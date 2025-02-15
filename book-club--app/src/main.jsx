@@ -12,16 +12,20 @@ import Navbar from "./components/NavBar.jsx";
 
 createRoot(document.getElementById("root")).render(
     <BrowserRouter>
-        <Navbar />
-        <Routes>
-            <Route index element={<Home />} />
+        <main>
+            <Navbar />
+            <div className="min-h-screen w-full flex items-center justify-center">
+            <Routes>
+                <Route index element={<Home />} />
 
-            <Route element={<AuthLayout />}>
-                <Route path="login" element={<Login />} />
-                <Route path="register" element={<Register />} />
-            </Route>
-            <Route path="/forum" element={<Forum />} />
-            <Route path="/proposals" element={<Proposals />} />
-        </Routes>
+                <Route element={<AuthLayout />}>
+                    <Route path="login" element={<Login />} />
+                    <Route path="register" element={<Register />} />
+                </Route>
+                <Route path="/forum" element={<Forum />} />
+                <Route path="/proposals" element={<Proposals />} />
+            </Routes>
+            </div>
+        </main>
     </BrowserRouter>
 );

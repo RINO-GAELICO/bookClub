@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@mantine/hooks": "^7.16.3",
+    "@tailwindcss/vite": "^4.0.6",
     "lucide-react": "^0.475.0",
+    "postcss-cli": "^11.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.1.5",
