@@ -92,23 +92,6 @@
     color: #eaeaea;  /* Light title color */
 }
 
-/* Comments list */
-.comments-list {
-    margin-bottom: 15px;
-}
-
-.comment {
-    padding: 10px;
-    border-bottom: 1px solid #444;  /* Dark border between comments */
-    color: #eaeaea;  /* Light text color */
-}
-
-/* Comment input section */
-.comment-input {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
 
 /* Textarea for comments */
 textarea {
@@ -140,34 +123,148 @@ button:hover {
     border-bottom: none;
 }
 
-/* Styling for the new comment input */
+
+
+/* Discussion container */
+.discussion-container {
+    margin-top: 30px;
+    color: #eaeaea;  /* Light text color for comments and input */
+}
+
+.formatting-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.formatting-buttons button {
+    padding: 5px 10px;
+    border: none;
+    background: #444;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.formatting-buttons button:hover {
+    background: #666;
+}
+
+/* Comments List */
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between comments */
+    margin-top: 10px;
+}
+
+/* Individual Comment */
+
+.comment {
+    position: relative;
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    border-radius: 5px;
+    background-color: #2b2d31; /* Discord-like dark background */
+    color: #dcddde;
+    font-size: 1rem;
+}
+
+.comment-actions {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.comment:hover .comment-actions {
+    opacity: 1;
+}
+
+.reply-button, .copy-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #aaa;
+    font-size: 0.85rem;
+    padding: 5px;
+    transition: color 0.2s;
+}
+
+.reply-button:hover, .copy-button:hover {
+    color: white;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between avatar and username */
+    margin-bottom: 5px;
+}
+
+.comment-avatar {
+    width: 40px;  /* Adjust size as needed */
+    height: 40px;
+    border-radius: 50%; /* Makes it a circle */
+    object-fit: cover;
+}
+
+.comment-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.comment-user {
+    font-weight: bold;
+    text-align: left;
+}
+
+.comment-timestamp {
+    font-size: 0.85rem;
+    color: gray;
+}
+/* Comment Text */
+.comment-text {
+    font-size: 1rem;
+    line-height: 1.4;
+    text-align: left;
+}
+
+/* Comment Input */
 .comment-input {
-    margin-top: 15px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    margin-top: 15px;
 }
 
-/* Textarea styling for new comments */
 .comment-input textarea {
     width: 100%;
     height: 80px;
     padding: 10px;
     font-size: 1rem;
-    border: 1px solid #444;
+    border: none;
     border-radius: 5px;
+    background-color: #40444b;
+    color: white;
     resize: none;
-    background-color: #3a3a3a;  /* Dark background */
-    color: #eaeaea;  /* Light text color */
 }
 
-/* Post comment button styling */
+.comment-input textarea::placeholder {
+    color: #b9bbbe;
+}
+
 .comment-input button {
     align-self: flex-end;
     padding: 8px 15px;
     font-size: 1rem;
     color: white;
-    background-color: #0077cc;
+    background-color: #5865F2; /* Discord-like blue */
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -175,11 +272,7 @@ button:hover {
 }
 
 .comment-input button:hover {
-    background-color: #005fa3;
+    background-color: #4752c4;
 }
 
-/* Discussion container */
-.discussion-container {
-    margin-top: 30px;
-    color: #eaeaea;  /* Light text color for comments and input */
-}
+
