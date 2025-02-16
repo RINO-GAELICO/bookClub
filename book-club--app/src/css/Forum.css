@@ -1,0 +1,185 @@
+/* Overall container */
+.forum-container {
+    max-width: 800px;
+    margin: 0 auto;
+    margin-top: 2em;
+    padding: 20px;
+    background-color: #1e1e1e;  /* Dark background color */
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);  /* Darker shadow for the card */
+    color: #eaeaea;  /* Light text color for readability */
+}
+
+/* Forum header */
+.forum-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 20px;
+    color: #eaeaea;  /* Light text color */
+}
+
+/* Header top (book image and meta info) */
+.header-top {
+    display: flex;
+    flex-direction: row;
+    gap: 20px; /* Adds spacing between book cover and text */
+    align-items: center;
+    width: 100%;
+}
+
+/* Book meta section */
+.book-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    height: 100%;
+}
+
+/* Book cover image */
+.book-cover {
+    width: 300px;
+    height: auto;
+    border-radius: 5px;
+}
+
+/* Book title (large, bold, light color) */
+.book-meta h1 {
+    font-size: 4rem;
+    font-weight: bold;
+    margin: 0;
+    color: #eaeaea;  /* Light color for title */
+}
+
+/* Book author name */
+.book-meta h2 {
+    font-size: 1.2rem;
+    color: #cfcfcf;  /* Slightly lighter gray for author */
+    margin: 5px 0;
+}
+
+/* Presentation text */
+.book-presentation {
+    font-size: 1rem;
+    margin-top: 10px;
+    color: #b5b5b5;  /* Light gray color for the presentation */
+}
+
+/* Separator (line between sections) */
+.separator {
+    width: 100%;
+    margin: 10px 0;
+    border: none;
+    height: 5px;
+    background-color: #555;  /* Dark separator */
+}
+
+/* Discussion card */
+.discussion-card {
+    background-color: #2c2c2c;  /* Dark background for the card */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);  /* Darker shadow for the card */
+    margin-top: 20px;
+}
+
+.discussion-card h3 {
+    font-weight: 600;
+    margin: 0;
+    color: #eaeaea;  /* Light title color */
+}
+
+/* Comments list */
+.comments-list {
+    margin-bottom: 15px;
+}
+
+.comment {
+    padding: 10px;
+    border-bottom: 1px solid #444;  /* Dark border between comments */
+    color: #eaeaea;  /* Light text color */
+}
+
+/* Comment input section */
+.comment-input {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Textarea for comments */
+textarea {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #444;  /* Dark border */
+    min-height: 100px;
+    background-color: #3a3a3a;  /* Dark background */
+    color: #eaeaea;  /* Light text color */
+}
+
+/* Post comment button */
+button {
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;  /* Slightly darker blue on hover */
+}
+
+/* No border for the last comment */
+.comment:last-child {
+    border-bottom: none;
+}
+
+/* Styling for the new comment input */
+.comment-input {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Textarea styling for new comments */
+.comment-input textarea {
+    width: 100%;
+    height: 80px;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #444;
+    border-radius: 5px;
+    resize: none;
+    background-color: #3a3a3a;  /* Dark background */
+    color: #eaeaea;  /* Light text color */
+}
+
+/* Post comment button styling */
+.comment-input button {
+    align-self: flex-end;
+    padding: 8px 15px;
+    font-size: 1rem;
+    color: white;
+    background-color: #0077cc;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.comment-input button:hover {
+    background-color: #005fa3;
+}
+
+/* Discussion container */
+.discussion-container {
+    margin-top: 30px;
+    color: #eaeaea;  /* Light text color for comments and input */
+}

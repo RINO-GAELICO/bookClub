@@ -1,0 +1,9 @@
+@import "tailwindcss";
+.custom-font {
+    font-size: 1em;
+    font-weight: 500;
+}
+
+a.active {
+    background-color: #1a1a1a;
+}

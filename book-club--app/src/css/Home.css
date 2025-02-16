@@ -3,45 +3,189 @@
     margin: 0 auto;
     padding: 2rem;
     text-align: center;
-  }
+}
 
-  .logo {
+.logo {
     height: 6em;
     padding: 1.5em;
     will-change: filter;
     transition: filter 300ms;
-  }
-  .logo:hover {
+}
+.logo:hover {
     filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.react:hover {
+}
+.logo.react:hover {
     filter: drop-shadow(0 0 2em #61dafbaa);
-  }
+}
 
-  @keyframes logo-spin {
+@keyframes logo-spin {
     from {
-      transform: rotate(0deg);
+        transform: rotate(0deg);
     }
     to {
-      transform: rotate(360deg);
+        transform: rotate(360deg);
     }
-  }
+}
 
-  @media (prefers-reduced-motion: no-preference) {
+@media (prefers-reduced-motion: no-preference) {
     a:nth-of-type(2) .logo {
-      animation: logo-spin infinite 20s linear;
+        animation: logo-spin infinite 20s linear;
     }
-  }
+}
 
-  .card {
+.card {
     padding: 2em;
-  }
+}
 
-  .read-the-docs {
+.read-the-docs {
     color: #888;
-  }
+}
 
-  a.active {
-    color: red;
-  }
+/* In your Home.css */
+.hero-background {
+    position: relative;
+    background-image: url("../assets/background.jpeg");
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);  /* Adjust opacity here */
+  z-index: 1;
+}
+
+.hero-content {
+  z-index: 2;
+  text-align: center;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.welcome-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;  /* Space between the heading and the button */
+  font-size: 2rem;      /* Adjust the font size of the welcome text */
+  font-weight: 600;     /* Bold text */
+  max-width: 80%;       /* Limits the width of the text container */
+  padding: 0 20px;      /* Optional: adds some padding for responsiveness */
+  border: solid 2px white;  /* Optional: adds a border around the text */
+}
+
+.separator {
+  width: 50%;           /* Controls the width of the line */
+  margin: 20px auto;    /* Centers the line horizontally with some space around it */
+  border: 1px solid white;  /* White line */
+  opacity: 0.7;         /* Slightly transparent line */
+}
+
+.subtext {
+  font-size: 1.2rem;    /* Smaller font size for the subtext */
+  font-weight: 400;     /* Normal weight */
+  max-width: 80%;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+/* Card Styles for Selection of the Week */
+.card {
+  background-color: rgba(255, 255, 255, 0.2);  /* Semi-transparent white background */
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+  width: 80%; /* Makes the card take up 80% of the container width */
+  max-width: 600px;  /* Maximum width of the card */
+  text-align: center;
+}
+
+.selection-of-the-week {
+  display: flex;
+  flex-direction: column;
+}
+
+.selection-of-the-week h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.book-title, .book-author {
+  font-size: 1.2rem;
+  color: white;
+  margin: 5px 0;
+}
+
+.book-title strong, .book-author strong {
+  color: #FFD700; /* Gold color for the title and author */
+}
+
+/* Styles for the book cover and info */
+.book-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px; /* Space between the text and the image */
+}
+
+.book-details {
+  flex: 1; /* Takes up remaining space */
+}
+
+.book-cover {
+  flex-shrink: 0; /* Prevents the image from shrinking */
+  width: 150px; /* Set width for the image */
+  height: auto; /* Automatically adjusts the height to maintain aspect ratio */
+}
+
+.book-cover img {
+  width: 100%;
+  border-radius: 8px; /* Optional: adds rounded corners to the image */
+}
+
+.book-description {
+  font-size: 1rem;
+  color: white;
+  margin-top: 15px;
+  line-height: 1.5;
+  text-align: center;
+  max-width: 80%;
+  text-align: center;
+  align-self: center;
+}
+
+
+.discussion-button {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  color: white;
+  background-color: #646cff;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  width: auto; /* Ensures it doesn't stretch */
+  max-width: 200px; /* Limits the width of the button */
+  align-self: center;
+}
+
+.discussion-button:hover {
+  background-color: #005fa3;
+}

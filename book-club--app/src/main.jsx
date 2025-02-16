@@ -14,7 +14,7 @@ createRoot(document.getElementById("root")).render(
     <BrowserRouter>
         <main>
             <Navbar />
-            <div className="min-h-screen w-full flex items-center justify-center">
+
             <Routes>
                 <Route index element={<Home />} />
 
@@ -25,7 +25,7 @@ createRoot(document.getElementById("root")).render(
                 <Route path="/forum" element={<Forum />} />
                 <Route path="/proposals" element={<Proposals />} />
             </Routes>
-            </div>
+
         </main>
     </BrowserRouter>
 );
