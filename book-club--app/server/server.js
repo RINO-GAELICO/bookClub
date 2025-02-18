@@ -5,8 +5,11 @@ import path from "path";
 import morgan from "morgan";
 import logger from "./logger.js";
 import { body, validationResult } from "express-validator";
+import dotenv from "dotenv";
+import { Sequelize } from "sequelize";
 
-
+// Load environment variables from .env file (Docker will inject them)
+dotenv.config();
 
 
 const app = express();
@@ -389,7 +392,27 @@ app.delete("/api/proposals/:proposalId", (req, res) => {
     res.status(200).json({ message: "Proposal deleted" });
 });
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Initialize Sequelize (use the correct class name `Sequelize` with a capital S)
+const sequelize = new Sequelize(
+    process.env.DB_NAME, // Database name from .env file
+    process.env.DB_USER, // Database user from .env file
+    process.env.DB_PASSWORD, // Database password from .env file
+    {
+        host: process.env.DB_HOST || 'localhost', // Database host (use 'db' for Docker container)
+        dialect: 'postgres',
+        logging: false,
+    }
+);
+
+// Sync Database (Create tables if not exists)
+const startServer = async () => {
+    try {
+        await sequelize.sync({ alter: true }); // Auto-sync models
+        console.log("✅ Database synced!");
+        app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+    } catch (error) {
+        console.error("❌ Failed to start server:", error);
+    }
+};
+
+startServer();
