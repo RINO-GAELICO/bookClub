@@ -4,10 +4,10 @@
     margin: 0 auto;
     margin-top: 2em;
     padding: 20px;
-    background-color: #1e1e1e;  /* Dark background color */
+    background-color: #1e1e1e;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);  /* Darker shadow for the card */
-    color: #eaeaea;  /* Light text color for readability */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    color: #eaeaea;
 }
 
 /* Forum header */
@@ -17,7 +17,7 @@
     align-items: center;
     gap: 10px;
     padding-bottom: 20px;
-    color: #eaeaea;  /* Light text color */
+    color: #eaeaea;
 }
 
 /* Header top (book image and meta info) */
@@ -51,13 +51,13 @@
     font-size: 4rem;
     font-weight: bold;
     margin: 0;
-    color: #eaeaea;  /* Light color for title */
+    color: #eaeaea; /* Light color for title */
 }
 
 /* Book author name */
 .book-meta h2 {
     font-size: 1.2rem;
-    color: #cfcfcf;  /* Slightly lighter gray for author */
+    color: #cfcfcf; /* Slightly lighter gray for author */
     margin: 5px 0;
 }
 
@@ -65,7 +65,7 @@
 .book-presentation {
     font-size: 1rem;
     margin-top: 10px;
-    color: #b5b5b5;  /* Light gray color for the presentation */
+    color: #b5b5b5; /* Light gray color for the presentation */
 }
 
 /* Separator (line between sections) */
@@ -74,40 +74,40 @@
     margin: 10px 0;
     border: none;
     height: 5px;
-    background-color: #555;  /* Dark separator */
+    background-color: #555; /* Dark separator */
 }
 
 /* Discussion card */
 .discussion-card {
-    background-color: #2c2c2c;  /* Dark background for the card */
+    background-color: #2c2c2c;
+    width: 85%;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);  /* Darker shadow for the card */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* Darker shadow for the card */
     margin-top: 20px;
 }
 
 .discussion-card h3 {
     font-weight: 600;
     margin: 0;
-    color: #eaeaea;  /* Light title color */
+    color: #eaeaea; /* Light title color */
 }
-
 
 /* Textarea for comments */
 textarea {
     padding: 10px;
     font-size: 1rem;
     border-radius: 5px;
-    border: 1px solid #444;  /* Dark border */
+    border: 1px solid #444; /* Dark border */
     min-height: 100px;
-    background-color: #3a3a3a;  /* Dark background */
-    color: #eaeaea;  /* Light text color */
+    background-color: #3a3a3a; /* Dark background */
+    color: #eaeaea; /* Light text color */
 }
 
 /* Post comment button */
 button {
     padding: 10px;
-    background-color: #007BFF;
+    background-color: #007bff;
     color: white;
     border: none;
     border-radius: 5px;
@@ -115,7 +115,7 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;  /* Slightly darker blue on hover */
+    background-color: #0056b3; /* Slightly darker blue on hover */
 }
 
 /* No border for the last comment */
@@ -123,12 +123,13 @@ button:hover {
     border-bottom: none;
 }
 
-
-
 /* Discussion container */
 .discussion-container {
     margin-top: 30px;
-    color: #eaeaea;  /* Light text color for comments and input */
+    color: #eaeaea;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .formatting-buttons {
@@ -157,6 +158,25 @@ button:hover {
     flex-direction: column;
     gap: 15px; /* Space between comments */
     margin-top: 10px;
+    max-height: 600px; /* Fixed height */
+    overflow-y: auto; /* Enable scrolling */
+    padding: 10px;
+    list-style-type: none; /* Remove default list styles */
+    margin: 0;
+}
+
+/* Optional: Custom scrollbar styling */
+.comments-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.comments-list::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.comments-list::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 /* Individual Comment */
@@ -186,7 +206,8 @@ button:hover {
     opacity: 1;
 }
 
-.reply-button, .copy-button {
+.reply-button,
+.copy-button {
     background: transparent;
     border: none;
     cursor: pointer;
@@ -196,7 +217,8 @@ button:hover {
     transition: color 0.2s;
 }
 
-.reply-button:hover, .copy-button:hover {
+.reply-button:hover,
+.copy-button:hover {
     color: white;
 }
 
@@ -208,7 +230,7 @@ button:hover {
 }
 
 .comment-avatar {
-    width: 40px;  /* Adjust size as needed */
+    width: 40px; /* Adjust size as needed */
     height: 40px;
     border-radius: 50%; /* Makes it a circle */
     object-fit: cover;
@@ -264,7 +286,7 @@ button:hover {
     padding: 8px 15px;
     font-size: 1rem;
     color: white;
-    background-color: #5865F2; /* Discord-like blue */
+    background-color: #5865f2; /* Discord-like blue */
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -275,4 +297,50 @@ button:hover {
     background-color: #4752c4;
 }
 
+.reply-label {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
 
+.reply-username {
+    font-weight: bold;
+    color: rgb(96, 125, 139);
+}
+
+.cancel-reply {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.cancel-reply:hover {
+    color: red;
+}
+
+/* Display the reply reference inside comments */
+.reply-reference {
+    font-size: 0.85rem;
+    color: #aaa;
+    padding-bottom: 3px;
+}
+
+/* Initial highlight effect */
+.highlight {
+    background-color: rgba(255, 255, 0, 0.2); /* Light yellow */
+    transition: background-color 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+/* Fade-out effect */
+.fade-out {
+    background-color: rgba(255, 255, 0, 0); /* Transparent */
+    opacity: 0.6;
+}

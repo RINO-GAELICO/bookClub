@@ -22,14 +22,14 @@ function Forum() {
         {
             id: 1,
             user: "Alice",
-            text: "I love how **Gatsby** represents the illusion of the *American Dream*!",
+            text: "I love how the author uses the metaphor of the **mountain** to describe her journey.",
             timestamp: new Date(),
             avatar: avatarPic,
         },
         {
             id: 2,
             user: "Bob",
-            text: "The green light is such a powerful symbol of ~~hope~~ and unattainable dreams.",
+            text: "I agree! The mountain metaphor is so *powerful* and really helps to visualize her struggles.",
             timestamp: new Date(),
             avatar: avatarPic,
         },
@@ -38,6 +38,7 @@ function Forum() {
     // State for new comment input
     const [newComment, setNewComment] = useState("");
     const [hoveredComment, setHoveredComment] = useState(null);
+    const [replyingTo, setReplyingTo] = useState(null);
 
     const textareaRef = useRef(null); // React ref for the textarea
 
@@ -57,9 +58,21 @@ function Forum() {
             text: newComment,
             timestamp: new Date(),
             avatar: avatarPic,
+            replyingTo: replyingTo ? replyingTo.id : null,
         };
         setComments([...comments, newCommentData]);
         setNewComment("");
+        setReplyingTo(null);
+        // scroll to the new comment
+        setTimeout(() => {
+            const newCommentElement = document.getElementById(
+                `comment-${newCommentData.id}`
+            );
+            if (newCommentElement) {
+                newCommentElement.scrollIntoView({ behavior: "smooth" });
+            }
+        }, 100);
+
     };
 
     // Function to insert markdown at the cursor position
@@ -102,8 +115,34 @@ function Forum() {
         alert("Comment copied!");
     };
 
-    const handleReply = (username) => {
-        setNewComment(`@${username} `);
+    const handleScrollReply = (replyCommentId) => {
+        const commentElement = document.getElementById(
+            `comment-${replyCommentId}`
+        );
+        if (commentElement) {
+            commentElement.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+            });
+
+            // Add highlight class
+            commentElement.classList.add("highlight");
+
+            // After 1.5s, start fading out
+            setTimeout(() => {
+                commentElement.classList.add("fade-out");
+            }, 1500);
+
+            // After 3s, remove both classes
+            setTimeout(() => {
+                commentElement.classList.remove("highlight", "fade-out");
+            }, 3000);
+        }
+    };
+
+    const handleReply = (comment) => {
+        console.log(`Commenting to ${comment}`);
+        setReplyingTo(comment); // Store the comment being replied to
         document.getElementById("comment-textarea").focus();
     };
 
@@ -136,10 +175,11 @@ function Forum() {
                     <hr className="separator" />
 
                     {/* List of Comments */}
-                    <div className="comments-list">
+                    <ol className="comments-list">
                         {comments.map((comment) => (
                             <div
                                 key={comment.id}
+                                id={`comment-${comment.id}`}
                                 className="comment"
                                 onMouseEnter={() =>
                                     setHoveredComment(comment.id)
@@ -166,7 +206,7 @@ function Forum() {
                                             <button
                                                 className="reply-button"
                                                 onClick={() =>
-                                                    handleReply(comment.user)
+                                                    handleReply(comment)
                                                 }
                                             >
                                                 ↩ Reply
@@ -182,6 +222,29 @@ function Forum() {
                                         </div>
                                     )}
                                 </div>
+                                {comment.replyingTo && (
+                                    <div className="reply-reference">
+                                        Replying to{" "}
+                                        <span
+                                            className="reply-username"
+                                            style={{
+                                                cursor: "pointer",
+                                                color: "#007BFF",
+                                                textDecoration: "underline",
+                                            }}
+                                            onClick={() =>
+                                                handleScrollReply(
+                                                    comment.replyingTo
+                                                )
+                                            }
+                                        >
+                                            {comments.find(
+                                                (c) =>
+                                                    c.id === comment.replyingTo
+                                            )?.user || "Unknown"}
+                                        </span>
+                                    </div>
+                                )}
                                 <ReactMarkdown
                                     className="comment-text"
                                     remarkPlugins={[remarkGfm]}
@@ -190,7 +253,7 @@ function Forum() {
                                 </ReactMarkdown>
                             </div>
                         ))}
-                    </div>
+                    </ol>
 
                     {/* New Comment Input */}
                     <div className="comment-input">
@@ -220,9 +283,36 @@ function Forum() {
                             </button>
                         </div>
 
+                        {/* Reply Label (Appears only if replyingTo is set) */}
+                        {replyingTo && (
+                            <div className="reply-label">
+                                Replying to{" "}
+                                <span
+                                    className="reply-username"
+                                    onClick={() =>
+                                        handleScrollReply(replyingTo.id)
+                                    }
+                                    style={{
+                                        cursor: "pointer",
+                                        color: "#007BFF",
+                                        textDecoration: "underline",
+                                    }}
+                                >
+                                    {replyingTo.user}
+                                </span>
+                                <button
+                                    className="cancel-reply"
+                                    onClick={() => setReplyingTo(null)}
+                                >
+                                    ✖
+                                </button>
+                            </div>
+                        )}
+
                         {/* Comment Input */}
                         <textarea
-                            ref={textareaRef} // <-- Make sure the ref is attached here
+                            id="comment-textarea"
+                            ref={textareaRef}
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
                             placeholder="Write your comment here..."

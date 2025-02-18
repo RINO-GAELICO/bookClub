@@ -1,0 +1,14 @@
+{
+    "proposalVotes": [
+      {
+        "userId": 1,
+        "proposalId": 1,
+        "vote": "upvote"
+      },
+      {
+        "userId": 2,
+        "proposalId": 1,
+        "vote": "downvote"
+      }
+    ]
+  }

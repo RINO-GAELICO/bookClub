@@ -41,25 +41,28 @@
     color: #888;
 }
 
-/* In your Home.css */
+/* Hero Section */
 .hero-background {
     position: relative;
     background-image: url("../assets/background.jpeg");
     background-size: cover;
     background-position: center;
-    height: 100vh;
+    min-height: 100vh; /* Ensure the section takes up at least 100% of the viewport height */
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column; /* Stack elements vertically */
+    padding-top: 100px; /* Ensure the content is pushed below the navbar */
 }
 
+/* Overlay to dim the background */
 .overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);  /* Adjust opacity here */
+  background: rgba(0, 0, 0, 0.5); /* Adjust opacity here */
   z-index: 1;
 }
 
@@ -72,13 +75,15 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  width: 100%;
+  padding: 0 20px; /* Add horizontal padding */
 }
 
 .welcome-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;  /* Space between the heading and the button */
+  margin-bottom: 20px; /* Space between the heading and the button */
   font-size: 2rem;      /* Adjust the font size of the welcome text */
   font-weight: 600;     /* Bold text */
   max-width: 80%;       /* Limits the width of the text container */
@@ -167,7 +172,6 @@
   text-align: center;
   align-self: center;
 }
-
 
 .discussion-button {
   display: inline-block;
