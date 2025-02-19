@@ -61,12 +61,13 @@ export const createComment = async (userId, proposalId, content, replyTo = null)
     }
 };
 
-export const createProposal = async (userId, title, description) => {
+export const createProposal = async (userId, title, description, week) => {
     try {
         return await Proposal.create({
             userId,
             title,
             description,
+            week
         });
     } catch (error) {
         throw new Error("❌ Error posting proposal: " + error.message);
@@ -116,6 +117,26 @@ export const getAllCommentsOnProposal = async (proposalId) => {
         throw new Error("❌ Error fetching comments: " + error.message);
     }
 }
+
+export const findProposalById = async (proposalId) => {
+    try {
+        return await Proposal.findOne({
+            where: { id: proposalId },
+        });
+    } catch (error) {
+        throw new Error("❌ Error fetching proposal: " + error.message);
+    }
+};
+
+export const findProposalsByUser = async (userId) => {
+    try {
+        return await Proposal.findAll({
+            where: { userId },
+        });
+    } catch (error) {
+        throw new Error("❌ Error fetching proposals: " + error.message);
+    }
+};
 
 
 

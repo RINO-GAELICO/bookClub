@@ -41,12 +41,6 @@ app.use((err, req, res) => {
     });
 });
 
-// // Get a specific proposal by id
-// app.get("/api/proposals/:proposalId", (req, res) => {
-//     const { proposalId } = req.params;
-//     const proposal = proposals.proposals.find((p) => p.id == proposalId);
-//     res.json(proposal);
-// });
 
 // // Route to get votes on a specific proposal
 // app.get("/api/proposals/:proposalId/votes", (req, res) => {
@@ -68,77 +62,7 @@ app.use((err, req, res) => {
 //     res.json(userProposals);
 // });
 
-// // Create a new proposal
-// app.post("/api/proposals", (req, res) => {
-//     const { userId, title, description } = req.body;
 
-//     const newProposal = {
-//         proposalId: proposals.proposals.length + 1, // Incremental proposalId
-//         userId,
-//         title,
-//         description,
-//         timestamp: new Date().toISOString(),
-//     };
-
-//     proposals.proposals.push(newProposal);
-//     fs.writeFileSync(
-//         path.resolve("server", "mockData", "proposals.json"),
-//         JSON.stringify(proposals)
-//     );
-
-//     res.status(201).json(newProposal);
-// });
-
-// // Create a new comment on a proposal
-// app.post("/api/proposals/:proposalId/comments", (req, res) => {
-//     const { proposalId } = req.params;
-//     const { userId, commentText } = req.body;
-
-//     const newComment = {
-//         commentId: comments.length + 1, // Incremental commentId
-//         userId,
-//         proposalId,
-//         commentText,
-//         timestamp: new Date().toISOString(),
-//         replyTo: null, // Optionally you can implement a reply functionality
-//     };
-
-//     comments.push(newComment);
-//     fs.writeFileSync(
-//         path.resolve("server", "mockData", "comments.json"),
-//         JSON.stringify(comments)
-//     );
-
-//     res.status(201).json(newComment);
-// });
-
-// // Reply to a comment
-// app.post("/api/comments/:commentId/reply", (req, res) => {
-//     const { commentId } = req.params;
-//     const { userId, replyText } = req.body;
-
-//     const comment = comments.find((c) => c.commentId == commentId);
-
-//     if (!comment) {
-//         return res.status(404).json({ error: "Comment not found" });
-//     }
-
-//     const reply = {
-//         commentId: comments.length + 1, // Incremental commentId
-//         userId,
-//         commentText: replyText,
-//         timestamp: new Date().toISOString(),
-//         replyTo: commentId, // This is the comment this reply is in response to
-//     };
-
-//     comments.push(reply);
-//     fs.writeFileSync(
-//         path.resolve("server", "mockData", "comments.json"),
-//         JSON.stringify(comments)
-//     );
-
-//     res.status(201).json(reply);
-// });
 
 // // Vote on a proposal
 // app.post("/api/proposals/:proposalId/vote", (req, res) => {
@@ -170,25 +94,6 @@ app.use((err, req, res) => {
 //     res.status(201).json(newVote);
 // });
 
-// // Get top voted proposals
-// app.get("/api/proposals/top", (req, res) => {
-//     const proposalVotesCount = {};
-
-//     proposalVotes.forEach((vote) => {
-//         proposalVotesCount[vote.proposalId] =
-//             (proposalVotesCount[vote.proposalId] || 0) + 1;
-//     });
-
-//     // Sort proposals by number of votes in descending order
-//     const topProposals = proposals
-//         .map((proposal) => ({
-//             ...proposal,
-//             votes: proposalVotesCount[proposal.proposalId] || 0,
-//         }))
-//         .sort((a, b) => b.votes - a.votes);
-
-//     res.json(topProposals);
-// });
 
 // // Channge vote on a proposal
 // app.put("/api/proposals/:proposalId/:userId/vote", (req, res) => {

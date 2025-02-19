@@ -39,4 +39,10 @@ export default [
             // 'react/prop-types': 'off',
         },
     },
+    {
+        files: ["server/**/*.{js,ts}"], // Assuming server-side code is in the 'server' directory
+        env: {
+            node: true, // This will enable Node.js-specific globals like 'module'
+        },
+    },
 ];

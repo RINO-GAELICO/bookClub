@@ -1,0 +1,18 @@
+{
+  "development": {
+    "username": "bookclub_user",
+    "password": "secretpassword",
+    "database": "bookclub",
+    "host": "db",
+    "dialect": "postgres",
+    "port": 5432
+  },
+  "production": {
+    "username": "bookclub_user",
+    "password": "secretpassword",
+    "database": "bookclub",
+    "host": "db",
+    "dialect": "postgres",
+    "port": 5432
+  }
+}
