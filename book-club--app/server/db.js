@@ -2,7 +2,7 @@ import { Sequelize } from "sequelize";
 
 // Database connection configuration
 const sequelize = new Sequelize({
-  host: process.env.DB_HOST || 'localhost', // Use 'localhost' or Docker service name
+  host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT || 5432, // Default PostgreSQL port
   username: process.env.DB_USER || 'bookclub_user',
   password: process.env.DB_PASSWORD || 'secretpassword',
