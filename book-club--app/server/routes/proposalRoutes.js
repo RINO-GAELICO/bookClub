@@ -14,4 +14,5 @@ router.get("/proposals/:proposalId", getProposalById);
 // Get all proposals by a specific user
 router.get("/proposals/user/:userId", getProposalsByUser);
 
+
 export default router;

@@ -42,57 +42,6 @@ app.use((err, req, res) => {
 });
 
 
-// // Route to get votes on a specific proposal
-// app.get("/api/proposals/:proposalId/votes", (req, res) => {
-//     const { proposalId } = req.params;
-//     const votes = proposalVotes.proposalVotes.filter(
-//         (vote) => vote.proposalId == proposalId
-//     );
-//     res.json(votes);
-// });
-
-// // Get all proposals created by a specific user
-// app.get("/api/users/:userId/proposals", (req, res) => {
-//     const { userId } = req.params;
-
-//     const userProposals = proposals.proposals.filter(
-//         (proposal) => proposal.userId == userId
-//     );
-
-//     res.json(userProposals);
-// });
-
-
-
-// // Vote on a proposal
-// app.post("/api/proposals/:proposalId/vote", (req, res) => {
-//     const { proposalId } = req.params;
-//     const { userId } = req.body;
-
-//     // Check if the user has already voted on this proposal
-//     const existingVote = proposalVotes.find(
-//         (vote) => vote.userId == userId && vote.proposalId == proposalId
-//     );
-
-//     if (existingVote) {
-//         return res
-//             .status(400)
-//             .json({ error: "You have already voted on this proposal" });
-//     }
-
-//     const newVote = {
-//         userId,
-//         proposalId,
-//     };
-
-//     proposalVotes.push(newVote);
-//     fs.writeFileSync(
-//         path.resolve("server", "mockData", "proposalVotes.json"),
-//         JSON.stringify(proposalVotes)
-//     );
-
-//     res.status(201).json(newVote);
-// });
 
 
 // // Channge vote on a proposal

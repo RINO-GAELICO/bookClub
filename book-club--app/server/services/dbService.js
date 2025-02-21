@@ -138,6 +138,77 @@ export const findProposalsByUser = async (userId) => {
     }
 };
 
+// Function to create a vote
+export const createVote = async (userId, proposalId, week) => {
+    try {
+        // Check if user has already voted in the given week
+        const existingVote = await ProposalVote.findOne({
+            where: {
+                userId,
+                week,
+            },
+        });
+
+        if (existingVote) {
+            throw new Error("❌ User has already voted this week.");
+        }
+
+        // Create a new vote
+        return await ProposalVote.create({
+            userId,
+            proposalId,
+            week,
+        });
+    } catch (error) {
+        throw new Error("❌ Error posting vote: " + error.message);
+    }
+};
+
+// Function to get votes by week
+export const getVotesByWeek = async (week) => {
+    try {
+        return await ProposalVote.findAll({
+            where: {
+                week,
+            },
+            include: [
+                {
+                    model: Proposal,  // Assuming you have a Proposal model
+                    required: true,
+                },
+            ],
+        });
+    } catch (error) {
+        throw new Error("❌ Error fetching votes by week: " + error.message);
+    }
+};
+
+// Function to get votes by proposal
+export const getVotesByProposal = async (proposalId) => {
+    try {
+        return await ProposalVote.findAll({
+            where: {
+                proposalId,
+            },
+        });
+    } catch (error) {
+        throw new Error("❌ Error fetching votes by proposal: " + error.message);
+    }
+};
+
+// Function to get votes by user
+export const getVotesByUser = async (userId) => {
+    try {
+        return await ProposalVote.findAll({
+            where: {
+                userId,
+            },
+        });
+    } catch (error) {
+        throw new Error("❌ Error fetching votes by user: " + error.message);
+    }
+};
+
 
 
 
