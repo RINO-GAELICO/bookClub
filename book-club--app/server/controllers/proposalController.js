@@ -3,7 +3,10 @@ import {
     createProposal,
     getAllProposals,
     findProposalById,
-    findProposalsByUser
+    findProposalsByUser,
+    removeProposal,
+    changeProposal,
+
 } from "../services/dbService.js";
 
 
@@ -49,6 +52,31 @@ export const getProposalsByUser = async (req, res) => {
         res.json(proposals);
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+};
+
+// Update a proposal
+export const updateProposal = async (req, res) => {
+    const { proposalId } = req.params;
+    const { title, description, week } = req.body;
+
+    try {
+        const updatedProposal = await changeProposal(proposalId, title, description, week);
+        res.json(updatedProposal);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+// Delete a proposal
+export const deleteProposal = async (req, res) => {
+    const { proposalId } = req.params;
+
+    try {
+        await removeProposal(proposalId);
+        res.json({ message: "Proposal deleted successfully" });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 };
 

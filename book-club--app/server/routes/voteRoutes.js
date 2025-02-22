@@ -4,6 +4,7 @@ import {
     getVotesByWeekController,
     getVotesByProposalController,
     getVotesByUserController,
+    updateVoteController,
  } from "../controllers/voteController.js";
 const router = express.Router();
 
@@ -19,6 +20,8 @@ router.get("/proposals/:proposalId/votes", getVotesByProposalController);
 // get votes by user
 router.get("/users/:userId/votes", getVotesByUserController);
 
+// change vote on a proposal
+router.put("/votes/:userId/week/:week", updateVoteController);
 
 
 

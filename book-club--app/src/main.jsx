@@ -23,7 +23,7 @@ createRoot(document.getElementById("root")).render(
                         <Route path="/register" element={<Register />} />
                     </Route>
                     <Route index element={<Home />} />
-                    <Route path="/forum/*" element={<PrivateRoute element={<Forum />} />} />
+                    <Route path="/forum/:proposalId" element={<PrivateRoute element={<Forum />} />} />
                     <Route path="/proposals/*" element={<PrivateRoute element={<Proposals />} />} />
                 </Routes>
             </main>

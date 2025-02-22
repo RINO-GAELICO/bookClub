@@ -1,6 +1,7 @@
 // models/proposalVote.js
 import { DataTypes } from "sequelize";
 import { sequelize } from "../db.js";
+import { Proposal } from "./Proposals.js";
 
 const ProposalVote = sequelize.define(
     "ProposalVote",
@@ -22,5 +23,9 @@ const ProposalVote = sequelize.define(
     },
     { timestamps: true }
 );
+
+// Define association
+ProposalVote.belongsTo(Proposal, { foreignKey: "proposalId" });
+Proposal.hasMany(ProposalVote, { foreignKey: "proposalId" });
 
 export { ProposalVote };

@@ -1,15 +1,18 @@
-import { useState, useRef } from "react";
-// import { useParams } from "react-router-dom";
-import ReactMarkdown from "react-markdown"; // Import react-markdown
+import { useState, useRef, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import "../css/Forum.css";
+import { api } from "../api";
 
 // Import placeholder book cover
 import bookCoverImage from "../assets/placeholder-title.jpeg";
 import avatarPic from "../assets/profile-placeholder.jpeg";
 
 function Forum() {
-    // const { id_book } = useParams(); // Retrieve book ID from URL
+
+    const { proposalId } = useParams();
+    const [error, setError] = useState("");
 
     // Placeholder data for the book discussion
     const bookTitle = "Educated";
@@ -34,6 +37,22 @@ function Forum() {
             avatar: avatarPic,
         },
     ]);
+
+    useEffect(() => {
+        // Fetch comments related to the current proposalId
+        const fetchComments = async () => {
+            try {
+                const response = await api.get(`/comments?proposalId=${proposalId}`);
+                setComments(response.data);
+            } catch (err) {
+                setError("Failed to fetch comments.", err);
+            }
+        };
+
+        fetchComments();
+    }, [proposalId]);
+
+    console.log("comments", comments);
 
     // State for new comment input
     const [newComment, setNewComment] = useState("");

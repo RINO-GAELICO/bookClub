@@ -2,6 +2,7 @@
 import { User } from "../models/Users.js";
 import { Comment } from "../models/Comments.js";
 import { Proposal } from "../models/Proposals.js";
+import { ProposalVote } from "../models/ProposalVote.js";
 // import { Op } from "sequelize";
 import bcrypt from "bcryptjs";
 
@@ -173,7 +174,7 @@ export const getVotesByWeek = async (week) => {
             },
             include: [
                 {
-                    model: Proposal,  // Assuming you have a Proposal model
+                    model: Proposal,
                     required: true,
                 },
             ],
@@ -208,6 +209,101 @@ export const getVotesByUser = async (userId) => {
         throw new Error("❌ Error fetching votes by user: " + error.message);
     }
 };
+
+// Function to update a vote
+export const updateVote = async (userId, proposalId, week) => {
+    try {
+        try {
+            const [updatedRows] = await ProposalVote.update(
+                { proposalId },
+                { where: { userId, week } }
+            );
+
+            if (updatedRows === 0) {
+                throw new Error("❌ No existing vote found for this user in the given week.");
+            }
+            const updatedVote = await ProposalVote.findOne({
+                where: { userId, week },
+            });
+            return updatedVote;
+        } catch (error) {
+            throw new Error("❌ Error updating vote: " + error.message);
+        }
+    } catch (error) {
+        throw new Error("❌ Error updating vote: " + error.message);
+    }
+};
+
+// Function to update a comment
+export const changeComment = async (commentId, content) => {
+    try {
+        const [updatedRows] = await Comment.update(
+            { content },
+            { where: { id: commentId } }
+        );
+
+        if (updatedRows === 0) {
+            throw new Error("❌ No existing comment found with this ID.");
+        }
+
+        const updatedComment = await Comment.findOne({
+            where: { id: commentId },
+        });
+        return updatedComment;
+    } catch (error) {
+        throw new Error("❌ Error updating comment: " + error.message);
+    }
+};
+
+// Function to delete a comment
+export const removeComment = async (commentId) => {
+    try {
+        const comment = await Comment.findByPk(commentId);
+        if (!comment) {
+            throw new Error("❌ Comment not found.");
+        }
+
+        await comment.destroy();
+    } catch (error) {
+        throw new Error("❌ Error deleting comment: " + error.message);
+    }
+};
+
+// Function to update a proposal
+export const changeProposal = async (proposalId, title, description, week) => {
+    try {
+        const [updatedRows] = await Proposal.update(
+            { title, description, week },
+            { where: { id: proposalId } }
+        );
+
+        if (updatedRows === 0) {
+            throw new Error("❌ No existing proposal found with this ID.");
+        }
+
+        const updatedProposal = await Proposal.findOne({
+            where: { id: proposalId },
+        });
+        return updatedProposal;
+    } catch (error) {
+        throw new Error("❌ Error updating proposal: " + error.message);
+    }
+};
+
+// Function to delete a proposal
+export const removeProposal = async (proposalId) => {
+    try {
+        const proposal = await Proposal.findByPk(proposalId);
+        if (!proposal) {
+            throw new Error("❌ Proposal not found.");
+        }
+
+        await proposal.destroy();
+    } catch (error) {
+        throw new Error("❌ Error deleting proposal: " + error.message);
+    }
+};
+
 
 
 

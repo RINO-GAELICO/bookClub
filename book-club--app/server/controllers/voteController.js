@@ -3,6 +3,7 @@ import {
     getVotesByWeek,
     getVotesByProposal,
     getVotesByUser,
+    updateVote,
 } from "../services/dbService.js";
 
 // Function to create a vote
@@ -48,6 +49,19 @@ export const getVotesByUserController = async (req, res) => {
     try {
         const votes = await getVotesByUser(userId);
         res.json(votes);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+// Function to update a vote
+export const updateVoteController = async (req, res) => {
+    const { userId, week } = req.params;
+    const { proposalId } = req.body;
+
+    try {
+        const updatedVote = await updateVote(userId, proposalId, week);
+        res.json({ message: "Vote updated successfully", vote: updatedVote });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

@@ -5,6 +5,8 @@ import {
     getCommentsUser,
     getRepliesComment,
     getAllCommentsOnProposal,
+    changeComment,
+    removeComment
 } from "../services/dbService.js";
 
 // Get all comments
@@ -65,6 +67,31 @@ export const getCommentsOnProposal = async (req, res) => {
     try {
         const comments = await getAllCommentsOnProposal(proposalId);
         res.json(comments);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Update a comment
+export const updateComment = async (req, res) => {
+    const { commentId } = req.params;
+    const { content } = req.body;
+
+    try {
+        const updatedComment = await changeComment(commentId, content);
+        res.json(updatedComment);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Delete a comment
+export const deleteComment = async (req, res) => {
+    const { commentId } = req.params;
+
+    try {
+        await removeComment(commentId);
+        res.status(200).json({ message: "Comment deleted" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
