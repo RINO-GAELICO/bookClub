@@ -1,4 +1,5 @@
 require('dotenv').config(); // Load environment variables from .env file
+// import { config } from 'dotenv';
 
 module.exports = {
   development: {

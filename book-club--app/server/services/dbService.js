@@ -17,7 +17,10 @@ export const getAllUsers = async () => {
 
 export const getUserByEmail = async (email) => {
     try {
-        return await User.findOne({ where: { email } });
+        return await User.findOne({
+            where: { email },
+            attributes: ["userId", "username", "email", "password"],
+        });
     } catch (error) {
         throw new Error(`❌ Error fetching user: ${error.message}`);
     }
@@ -40,6 +43,7 @@ export const registerNewUser = async (email, username, password) => {
     }
 };
 
+// Function to get all comments
 export const getAllComments = async () => {
     try {
         const comments = await Comment.findAll();
@@ -49,32 +53,56 @@ export const getAllComments = async () => {
     }
 };
 
-export const createComment = async (userId, proposalId, content, replyTo = null) => {
+// Function to create a comment
+export const createComment = async (
+    userId,
+    proposalId,
+    content,
+    replyTo = null
+) => {
     try {
-        return await Comment.create({
+        // Create the comment
+        const newComment = await Comment.create({
             userId,
             proposalId,
             content,
             replyTo,
         });
+
+        // Fetch the comment with the associated user (to get the username)
+        const createdCommentWithUser = await Comment.findOne({
+            where: { id: newComment.id },
+            include: [
+                {
+                    model: User,
+                    as: "User",
+                    required: true,
+                    attributes: ["userId", "username"],
+                },
+            ],
+        });
+
+        return createdCommentWithUser; // Return the comment with user info
     } catch (error) {
         throw new Error("❌ Error posting comment: " + error.message);
     }
 };
 
+// Function to create a proposal
 export const createProposal = async (userId, title, description, week) => {
     try {
         return await Proposal.create({
             userId,
             title,
             description,
-            week
+            week,
         });
     } catch (error) {
         throw new Error("❌ Error posting proposal: " + error.message);
     }
 };
 
+// Function to get all proposals
 export const getAllProposals = async () => {
     try {
         const proposals = await Proposal.findAll();
@@ -84,22 +112,14 @@ export const getAllProposals = async () => {
     }
 };
 
+// Function to get all comments by user
 export const getCommentsUser = async (userId) => {
     try {
         return await Comment.findAll({ where: { userId } });
     } catch (error) {
         throw new Error("❌ Error fetching comments: " + error.message);
     }
-}
-
-// get Comments by proposalId
-export const getCommentsByProposal = async (proposalId) => {
-    try {
-        return await Comment.findAll({ where: { proposalId } });
-    } catch (error) {
-        throw new Error("❌ Error fetching comments: " + error.message);
-    }
-}
+};
 
 // get Comments by commentID
 export const getRepliesComment = async (commentId) => {
@@ -108,17 +128,28 @@ export const getRepliesComment = async (commentId) => {
     } catch (error) {
         throw new Error("❌ Error fetching comments: " + error.message);
     }
-}
+};
 
 // get Comments by proposalId
 export const getAllCommentsOnProposal = async (proposalId) => {
     try {
-        return await Comment.findAll({ where: { proposalId } });
+        return await Comment.findAll({
+            where: { proposalId },
+            include: [
+                {
+                    model: User,
+                    as: "User",
+                    required: true,
+                    attributes: ["userId", "username"],
+                },
+            ],
+        });
     } catch (error) {
         throw new Error("❌ Error fetching comments: " + error.message);
     }
-}
+};
 
+// Function to find a comment by ID
 export const findProposalById = async (proposalId) => {
     try {
         return await Proposal.findOne({
@@ -129,6 +160,7 @@ export const findProposalById = async (proposalId) => {
     }
 };
 
+// Function to find proposals by user
 export const findProposalsByUser = async (userId) => {
     try {
         return await Proposal.findAll({
@@ -193,7 +225,9 @@ export const getVotesByProposal = async (proposalId) => {
             },
         });
     } catch (error) {
-        throw new Error("❌ Error fetching votes by proposal: " + error.message);
+        throw new Error(
+            "❌ Error fetching votes by proposal: " + error.message
+        );
     }
 };
 
@@ -220,7 +254,9 @@ export const updateVote = async (userId, proposalId, week) => {
             );
 
             if (updatedRows === 0) {
-                throw new Error("❌ No existing vote found for this user in the given week.");
+                throw new Error(
+                    "❌ No existing vote found for this user in the given week."
+                );
             }
             const updatedVote = await ProposalVote.findOne({
                 where: { userId, week },
@@ -303,9 +339,3 @@ export const removeProposal = async (proposalId) => {
         throw new Error("❌ Error deleting proposal: " + error.message);
     }
 };
-
-
-
-
-
-

@@ -1,6 +1,9 @@
 # Use official Node.js image
 FROM node:20
 
+# Install PostgreSQL client (pg_dump)
+RUN apt-get update && apt-get install -y postgresql-client
+
 # Set working directory inside the container
 WORKDIR /app
 

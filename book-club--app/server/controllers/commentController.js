@@ -23,6 +23,10 @@ export const getComments = async (req, res) => {
 export const postComment = async (req, res) => {
     const { userId, proposalId, content, replyTo } = req.body;
 
+    if (!userId || !proposalId || !content) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
     try {
         const newComment = await createComment(
             userId,

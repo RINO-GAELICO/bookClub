@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 import logger from "./logger.js";
 import dotenv from "dotenv";
 import { sequelize } from "./db.js";
@@ -8,6 +9,9 @@ import userRoutes from "./routes/userRoutes.js";
 import proposalRoutes from "./routes/proposalRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
 import voteRoutes from "./routes/voteRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+
+
 
 // Load environment variables from .env file (Docker will inject them)
 dotenv.config();
@@ -15,8 +19,18 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors(
+    {
+        origin: "http://localhost:5173",
+        credentials: true,
+    }
+));
+
 app.use(express.json());
+app.use(cookieParser());
+
+// Authentication Routes
+app.use("/api", authRoutes);
 
 // Import routes
 app.use("/api", userRoutes);

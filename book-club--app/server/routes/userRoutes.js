@@ -5,6 +5,7 @@ import {
     getUsers,
     loginUser,
     registerUser,
+    logoutUser
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -12,8 +13,11 @@ const router = express.Router();
 // Get all users
 router.get("/users", getUsers);
 
-// Get a specific user by email or username (for login)
-router.get("/users/login", loginUser);
+// // Get a specific user by email or username (for login)
+// router.post("/users/login", loginUser);
+
+// // Logout Route
+// router.post("/users/logout", logoutUser);
 
 // Register new user
 router.post(

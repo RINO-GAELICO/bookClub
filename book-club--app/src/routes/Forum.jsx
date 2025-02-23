@@ -20,29 +20,13 @@ function Forum() {
     const bookPresentation =
         "An unforgettable memoir about a young person who, kept out of school, leaves her survivalist family and goes on to earn a PhD from Cambridge University";
 
-    // Placeholder comments
-    const [comments, setComments] = useState([
-        {
-            id: 1,
-            user: "Alice",
-            text: "I love how the author uses the metaphor of the **mountain** to describe her journey.",
-            timestamp: new Date(),
-            avatar: avatarPic,
-        },
-        {
-            id: 2,
-            user: "Bob",
-            text: "I agree! The mountain metaphor is so *powerful* and really helps to visualize her struggles.",
-            timestamp: new Date(),
-            avatar: avatarPic,
-        },
-    ]);
+    const [comments, setComments] = useState([]);
 
     useEffect(() => {
         // Fetch comments related to the current proposalId
         const fetchComments = async () => {
             try {
-                const response = await api.get(`/comments?proposalId=${proposalId}`);
+                const response = await api.get(`/comments/proposal/${proposalId}`);
                 setComments(response.data);
             } catch (err) {
                 setError("Failed to fetch comments.", err);
@@ -69,28 +53,41 @@ function Forum() {
     };
 
     // Handle posting a new comment
-    const handlePostComment = () => {
+    const handlePostComment = async () => {
         if (newComment.trim() === "") return;
+
         const newCommentData = {
-            id: comments.length + 1,
-            user: "Guest User",
-            text: newComment,
+            proposalId: proposalId,
+            userId: 1,
+            content: newComment,
             timestamp: new Date(),
             avatar: avatarPic,
-            replyingTo: replyingTo ? replyingTo.id : null,
+            replyTo: replyingTo ? replyingTo.id : null,
         };
-        setComments([...comments, newCommentData]);
-        setNewComment("");
-        setReplyingTo(null);
-        // scroll to the new comment
-        setTimeout(() => {
-            const newCommentElement = document.getElementById(
-                `comment-${newCommentData.id}`
-            );
-            if (newCommentElement) {
-                newCommentElement.scrollIntoView({ behavior: "smooth" });
-            }
-        }, 100);
+        console.log("Posting comment:", newCommentData);
+        console.log("replyingTo", replyingTo);
+        try {
+            const response = await api.post("/comment/post", newCommentData);
+
+            console.log("response ", response.data);
+
+            // Add the newly created comment from backend response to state
+            setComments((prevComments) => [...prevComments, response.data]);
+
+            setNewComment("");
+            setReplyingTo(null);
+
+            // Scroll to the new comment after rendering
+            setTimeout(() => {
+                const newCommentElement = document.getElementById(`comment-${response.data.id}`);
+                if (newCommentElement) {
+                    newCommentElement.scrollIntoView({ behavior: "smooth" });
+                }
+            }, 100);
+        } catch (error) {
+            console.error("Failed to post comment:", error);
+            setError("Failed to post comment. Please try again.");
+        }
 
     };
 
@@ -160,7 +157,7 @@ function Forum() {
     };
 
     const handleReply = (comment) => {
-        console.log(`Commenting to ${comment}`);
+        console.log(`Commenting to ${JSON.stringify(comment)}`);
         setReplyingTo(comment); // Store the comment being replied to
         document.getElementById("comment-textarea").focus();
     };
@@ -207,13 +204,14 @@ function Forum() {
                             >
                                 <div className="comment-header">
                                     <img
-                                        src={comment.avatar}
+                                        // TODO - Use the actual avatar URL from the API
+                                        src={avatarPic}
                                         alt={`${comment.user}'s avatar`}
                                         className="comment-avatar"
                                     />
                                     <div className="comment-info">
                                         <strong className="comment-user">
-                                            {comment.user}
+                                            {comment.User.username}
                                         </strong>
                                         <span className="comment-timestamp">
                                             {formatTimestamp(comment.timestamp)}
@@ -241,7 +239,7 @@ function Forum() {
                                         </div>
                                     )}
                                 </div>
-                                {comment.replyingTo && (
+                                {comment.replyTo && (
                                     <div className="reply-reference">
                                         Replying to{" "}
                                         <span
@@ -253,14 +251,14 @@ function Forum() {
                                             }}
                                             onClick={() =>
                                                 handleScrollReply(
-                                                    comment.replyingTo
+                                                    comment.replyTo
                                                 )
                                             }
                                         >
                                             {comments.find(
                                                 (c) =>
-                                                    c.id === comment.replyingTo
-                                            )?.user || "Unknown"}
+                                                    c.id === comment.replyTo
+                                            )?.User.username || "Unknown"}
                                         </span>
                                     </div>
                                 )}
@@ -268,7 +266,7 @@ function Forum() {
                                     className="comment-text"
                                     remarkPlugins={[remarkGfm]}
                                 >
-                                    {comment.text}
+                                    {comment.content}
                                 </ReactMarkdown>
                             </div>
                         ))}
@@ -317,7 +315,7 @@ function Forum() {
                                         textDecoration: "underline",
                                     }}
                                 >
-                                    {replyingTo.user}
+                                    {replyingTo.User.username}
                                 </span>
                                 <button
                                     className="cancel-reply"

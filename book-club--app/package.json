@@ -7,17 +7,20 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sequelize": "node --loader ts-node/esm node_modules/.bin/sequelize"
   },
   "dependencies": {
     "@mantine/hooks": "^7.16.3",
     "@tailwindcss/vite": "^4.0.6",
     "axios": "^1.7.9",
     "bcryptjs": "^3.0.1",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.475.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.9",
