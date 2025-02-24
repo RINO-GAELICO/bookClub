@@ -7,14 +7,17 @@ import {
     getCommentsOnProposal,
     updateComment,
     deleteComment,
- } from "../controllers/commentController.js";
+} from "../controllers/commentController.js";
+
+import authenticateToken from "../middleware/authenticateToken.js";
+
 const router = express.Router();
 
 // Get all comments
 router.get("/comments", getComments);
 
 // Post a comment on a proposal
-router.post("/comment/post", postComment);
+router.post("/comment/post", authenticateToken, postComment);
 
 // Get all comments on a specific proposal
 router.get("/comments/proposal/:proposalId", getCommentsOnProposal);
@@ -26,9 +29,9 @@ router.get("/comments/user/:userId", getCommentsByUser);
 router.get("/comments/:commentId/replies", getReplies);
 
 // Change a comment
-router.put("/comment/:commentId", updateComment);
+router.put("/comment/:commentId", authenticateToken, updateComment);
 
 // Delete a comment
-router.delete("/comment/:commentId", deleteComment);
+router.delete("/comment/:commentId", authenticateToken, deleteComment);
 
 export default router;

@@ -6,14 +6,21 @@ import {
     findProposalsByUser,
     removeProposal,
     changeProposal,
+    findProposalsByWeek
 
 } from "../services/dbService.js";
+
+import { getCurrentWeek } from "../utils.js";
+import { Proposal } from "../models/Proposals.js";
 
 
 
 // Post a new proposal
 export const postProposal = async (req, res) => {
-    const { userId, title, description, week } = req.body;
+    const { userId, title, description } = req.body;
+
+    // Get the current week
+    const week = getCurrentWeek();
 
     try {
         const newProposal = await createProposal(userId, title, description, week);
@@ -27,6 +34,24 @@ export const postProposal = async (req, res) => {
 export const getProposals = async (req, res) => {
     try {
         const proposals = await getAllProposals();
+        res.json(proposals);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Get proposals by week
+export const getProposalsByCurrentWeek = async (req, res) => {
+
+    const { userId } = req.query;
+
+    const currentWeek = getCurrentWeek();
+
+    try {
+        const proposals = await findProposalsByWeek(currentWeek, userId);
+        if (!proposals.length) {
+            return res.status(404).json({ error: "No proposals found for this week" });
+        }
         res.json(proposals);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -58,13 +83,25 @@ export const getProposalsByUser = async (req, res) => {
 // Update a proposal
 export const updateProposal = async (req, res) => {
     const { proposalId } = req.params;
-    const { title, description, week } = req.body;
+    const { title, description } = req.body;
 
     try {
-        const updatedProposal = await changeProposal(proposalId, title, description, week);
-        res.json(updatedProposal);
+        const proposal = await Proposal.findByPk(proposalId);
+
+        if (!proposal) {
+            return res.status(404).json({ error: "Proposal not found" });
+        }
+
+        // Only update the fields that are provided in the request
+        if (title !== undefined) proposal.title = title;
+        if (description !== undefined) proposal.description = description;
+
+        await proposal.save(); // Save changes
+
+        return res.status(200).json(proposal);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        console.error("Error updating proposal:", error);
+        return res.status(500).json({ error: "Failed to update proposal" });
     }
 };
 

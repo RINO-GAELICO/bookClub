@@ -40,29 +40,33 @@ export const loginUser = async (req, res) => {
             return res.status(400).json({ error: "Invalid credentials" });
         }
 
-        console.log("User logged in successfully");
-
-        // Generate JWT Token
-        const token = jwt.sign(
+        // Generate Access Token (Short-lived)
+        const accessToken = jwt.sign(
             { userId: user.id, username: user.username },
             process.env.JWT_SECRET,
-            { expiresIn: "24h" }
+            { expiresIn: "15m" }
         );
 
-        console.log(`Token: ${token}`);
+        // Generate Refresh Token (Long-lived)
+        const refreshToken = jwt.sign(
+            { userId: user.id },
+            process.env.JWT_REFRESH_SECRET,
+            { expiresIn: "7d" }
+        );
 
         logger.info(`User ${user.username} logged in`);
 
-        // Send token in a secure HttpOnly cookie
-        res.cookie("token", token, {
+        // Store Refresh Token in HTTP-only Cookie
+        res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "Strict",
-            maxAge: 3600000, // 1 hour
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
-        // Send user data **without password**
+        // Send Access Token in response (not in cookie)
         res.json({
+            accessToken,
             userId: user.id,
             username: user.username,
             email: user.email,
@@ -72,12 +76,52 @@ export const loginUser = async (req, res) => {
     }
 };
 
+export const refreshToken = (req, res) => {
+    const { refreshToken } = req.cookies;
+
+    if (!refreshToken) {
+        return res.status(401).json({ error: "Unauthorized: No refresh token" });
+    }
+
+    try {
+        // Verify Refresh Token
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+        // Generate New Access Token
+        const newAccessToken = jwt.sign(
+            { userId: decoded.userId },
+            process.env.JWT_SECRET,
+            { expiresIn: "15m" }
+        );
+
+        res.json({ accessToken: newAccessToken });
+    } catch (error) {
+        return res.status(403).json({ error: "Forbidden: Invalid refresh token" });
+    }
+};
+
+// Get the profile of the currently logged-in user
+export const getUserProfile = (req, res) => {
+    try {
+        // `req.user` will be set by the authentication middleware if the token is valid
+        res.json({
+            userId: req.user.userId,
+            username: req.user.username,
+            email: req.user.email,
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error", message: error.message });
+    }
+};
+
+
 // Logout user
 export const logoutUser = (req, res) => {
-    if (!req.cookies.token) {
+    if (!req.cookies.refreshToken) {
         return res.status(401).json({ error: "Unauthorized" });
     }
-    res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "Strict" });
+
+    res.clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "Strict" });
     res.json({ message: "Logged out successfully" });
 };
 

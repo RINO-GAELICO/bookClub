@@ -11,6 +11,7 @@ import Proposals from "./routes/Proposals.jsx";
 import Navbar from "./components/NavBar.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import { AuthProvider } from "./context/AuthProvider.jsx";
+import RedirectToForum from "./routes/RedirectToForum.jsx";
 
 createRoot(document.getElementById("root")).render(
     <AuthProvider>
@@ -23,6 +24,7 @@ createRoot(document.getElementById("root")).render(
                         <Route path="/register" element={<Register />} />
                     </Route>
                     <Route index element={<Home />} />
+                    <Route path="/forum" element={<PrivateRoute element={<RedirectToForum />} />} />
                     <Route path="/forum/:proposalId" element={<PrivateRoute element={<Forum />} />} />
                     <Route path="/proposals/*" element={<PrivateRoute element={<Proposals />} />} />
                 </Routes>

@@ -13,12 +13,6 @@ const router = express.Router();
 // Get all users
 router.get("/users", getUsers);
 
-// // Get a specific user by email or username (for login)
-// router.post("/users/login", loginUser);
-
-// // Logout Route
-// router.post("/users/logout", logoutUser);
-
 // Register new user
 router.post(
     "/users/register",

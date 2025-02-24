@@ -1,16 +1,18 @@
-import { useState } from "react";
-import "../css/Proposals.css";
-// Import placeholder book cover
+import { useState, useEffect } from "react";
+import { api } from "../api";
 import bookCoverImage from "../assets/placeholder-title.jpeg";
+import "../css/Proposals.css";
 
 function Proposals() {
     const [isEditable, setIsEditable] = useState(false);
-    const [image, setImage] = useState(null); // To handle image upload
+    const [proposalId, setProposalId] = useState(null); // Store proposal ID
+    const [image, setImage] = useState(null);
     const [title, setTitle] = useState("Sample Title");
     const [author, setAuthor] = useState("Sample Author");
     const [introParagraph, setIntroParagraph] = useState(
         "This is an introductory paragraph."
     );
+    const [error, setError] = useState("");
 
     // Sample proposals array (mock data)
     const proposals = [
@@ -36,6 +38,84 @@ function Proposals() {
             intro: "Proposal 3 explores various approaches to solving a particular problem. It examines several case studies.",
         },
     ];
+
+    useEffect(() => {
+        const fetchProposal = async () => {
+            const token = sessionStorage.getItem("accessToken");
+            if (!token) {
+                setError("You must be logged in.");
+                return;
+            }
+
+            try {
+                const userId = 1;
+                const response = await api.get(`/proposals/week?userId=${userId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                if (response.data.length > 0) {
+                    const userProposal = response.data[0]; // Assuming only one proposal per user per week
+                    console.log("User Proposal:", userProposal);
+                    setProposalId(userProposal.id);
+                    setTitle(userProposal.title);
+                    setIntroParagraph(userProposal.description);
+                }
+            } catch (error) {
+                console.error("Error fetching proposal:", error);
+            }
+        };
+
+        fetchProposal();
+    }, []);
+
+    const handleSaveProposal = async () => {
+        setIsEditable(!isEditable);
+        if (!isEditable) return;
+
+        if (title.trim() === "" || introParagraph.trim() === "") {
+            setError("Title and Introduction are required.");
+            return;
+        }
+
+        const token = sessionStorage.getItem("accessToken");
+        if (!token) {
+            setError("You must be logged in.");
+            return;
+        }
+
+        const proposalData = {
+            title,
+            description: introParagraph,
+        };
+
+        try {
+            if (proposalId) {
+                // Update existing proposal
+                await api.patch(`/proposals/${proposalId}`, proposalData, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            } else {
+                // Create new proposal
+                const response = await api.post(
+                    "/proposal/post",
+                    {
+                        ...proposalData,
+                        week: 1, // Replace with correct week calculation
+                    },
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
+
+                setProposalId(response.data.id); // Save the new proposal ID
+            }
+
+            console.log("Proposal saved successfully.");
+        } catch (error) {
+            console.error("Failed to save proposal:", error);
+            setError("Failed to save proposal.");
+        }
+    };
 
     // Handle image upload
     const handleImageUpload = (event) => {
@@ -84,7 +164,6 @@ function Proposals() {
                             {isEditable ? (
                                 <input
                                     id="title"
-                                    type="text"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                 />
@@ -124,10 +203,12 @@ function Proposals() {
                             )}
                         </div>
 
-                        {/* Edit Button */}
-                        <button onClick={() => setIsEditable((prev) => !prev)}>
-                            {isEditable ? "Save" : "Edit"}
-                        </button>
+                        {/* Handle saving the proposal */}
+                        {
+                            <button onClick={handleSaveProposal}>
+                                {isEditable ? "Save Proposal" : "Edit Proposal"}
+                            </button>
+                        }
                     </div>
                 </div>
             </div>

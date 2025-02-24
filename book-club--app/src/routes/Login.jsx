@@ -1,37 +1,37 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Importing the navigation hook
-// import usersData from "../mockData/users.json";  // Import mock user data
-import { api } from "../api"; // Import the API module
-
-import useAuth from "../context/useAuth"; // Import the custom hook for auth context
+import { useNavigate } from "react-router-dom";
+import { api } from "../api";
+import useAuth from "../context/useAuth";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState(""); // State to display login error
-    const { login } = useAuth(); // Destructure login function from auth context
-    const navigate = useNavigate(); // Hook to handle navigation
+    const [error, setError] = useState("");
+    const { login } = useAuth();
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            const response = await api.post("/users/login", {
-                email,
-                password
-            });
+            const response = await api.post(
+                "/users/login",
+                { email, password },
+                { withCredentials: true }
+            );
 
             if (response.status !== 200) {
                 throw new Error("Invalid email or password.");
             }
 
-            const user = response.data;
-            setError(""); // Clear any previous errors
-            login(user); // Update auth context with user info
-            navigate("/"); // Redirect to home page
-
+            const { accessToken, ...user } = response.data;
+            login(user, accessToken);
+            setError("");
+            navigate("/");
         } catch (error) {
-            setError(error.message || "Something went wrong. Please try again.");
+            setError(
+                error.message || "Something went wrong. Please try again."
+            );
         }
     };
 

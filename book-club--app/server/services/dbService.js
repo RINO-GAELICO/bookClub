@@ -112,6 +112,17 @@ export const getAllProposals = async () => {
     }
 };
 
+// Function to find a proposal by week
+export const findProposalsByWeek = async (week, userId) => {
+    try {
+        return await Proposal.findAll({
+            where: { week, userId },
+        });
+    } catch (error) {
+        throw new Error("❌ Error fetching proposals: " + error.message);
+    }
+};
+
 // Function to get all comments by user
 export const getCommentsUser = async (userId) => {
     try {

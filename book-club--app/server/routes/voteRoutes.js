@@ -6,10 +6,13 @@ import {
     getVotesByUserController,
     updateVoteController,
  } from "../controllers/voteController.js";
+
+import authenticateToken from "../middleware/authenticateToken.js";
+
 const router = express.Router();
 
 // post a vote
-router.post("/proposals/:proposalId/vote", postVote);
+router.post("/proposals/:proposalId/vote", authenticateToken, postVote);
 
 // get votes by week
 router.get("/votes/week/:week", getVotesByWeekController);
@@ -21,7 +24,7 @@ router.get("/proposals/:proposalId/votes", getVotesByProposalController);
 router.get("/users/:userId/votes", getVotesByUserController);
 
 // change vote on a proposal
-router.put("/votes/:userId/week/:week", updateVoteController);
+router.put("/votes/:userId/week/:week", authenticateToken, updateVoteController);
 
 
 

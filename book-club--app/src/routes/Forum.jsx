@@ -10,7 +10,6 @@ import bookCoverImage from "../assets/placeholder-title.jpeg";
 import avatarPic from "../assets/profile-placeholder.jpeg";
 
 function Forum() {
-
     const { proposalId } = useParams();
     const [error, setError] = useState("");
 
@@ -26,7 +25,9 @@ function Forum() {
         // Fetch comments related to the current proposalId
         const fetchComments = async () => {
             try {
-                const response = await api.get(`/comments/proposal/${proposalId}`);
+                const response = await api.get(
+                    `/comments/proposal/${proposalId}`
+                );
                 setComments(response.data);
             } catch (err) {
                 setError("Failed to fetch comments.", err);
@@ -67,7 +68,20 @@ function Forum() {
         console.log("Posting comment:", newCommentData);
         console.log("replyingTo", replyingTo);
         try {
-            const response = await api.post("/comment/post", newCommentData);
+            // Get the token from storage (sessionStorage, localStorage, or wherever it is stored)
+            const token = sessionStorage.getItem("accessToken"); // Or wherever you're storing it
+
+            if (!token) {
+                setError("You must be logged in to post a comment.");
+                return;
+            }
+
+            // Send the token in the Authorization header
+            const response = await api.post("/comment/post", newCommentData, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Add the Authorization header with the token
+                },
+            });
 
             console.log("response ", response.data);
 
@@ -79,7 +93,9 @@ function Forum() {
 
             // Scroll to the new comment after rendering
             setTimeout(() => {
-                const newCommentElement = document.getElementById(`comment-${response.data.id}`);
+                const newCommentElement = document.getElementById(
+                    `comment-${response.data.id}`
+                );
                 if (newCommentElement) {
                     newCommentElement.scrollIntoView({ behavior: "smooth" });
                 }
@@ -88,7 +104,6 @@ function Forum() {
             console.error("Failed to post comment:", error);
             setError("Failed to post comment. Please try again.");
         }
-
     };
 
     // Function to insert markdown at the cursor position
@@ -256,8 +271,7 @@ function Forum() {
                                             }
                                         >
                                             {comments.find(
-                                                (c) =>
-                                                    c.id === comment.replyTo
+                                                (c) => c.id === comment.replyTo
                                             )?.User.username || "Unknown"}
                                         </span>
                                     </div>
