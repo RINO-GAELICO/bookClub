@@ -5,7 +5,6 @@ import {
     findProposalById,
     findProposalsByUser,
     removeProposal,
-    changeProposal,
     findProposalsByWeek
 
 } from "../services/dbService.js";
@@ -17,13 +16,13 @@ import { Proposal } from "../models/Proposals.js";
 
 // Post a new proposal
 export const postProposal = async (req, res) => {
-    const { userId, title, description } = req.body;
+    const { userId, title, description, author } = req.body;
 
     // Get the current week
     const week = getCurrentWeek();
 
     try {
-        const newProposal = await createProposal(userId, title, description, week);
+        const newProposal = await createProposal(userId, title, description, author, week);
         res.status(201).json(newProposal);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -40,7 +39,7 @@ export const getProposals = async (req, res) => {
     }
 };
 
-// Get proposals by week
+// Get proposals by week and user
 export const getProposalsByCurrentWeek = async (req, res) => {
 
     const { userId } = req.query;
@@ -83,7 +82,7 @@ export const getProposalsByUser = async (req, res) => {
 // Update a proposal
 export const updateProposal = async (req, res) => {
     const { proposalId } = req.params;
-    const { title, description } = req.body;
+    const { title, description, author } = req.body;
 
     try {
         const proposal = await Proposal.findByPk(proposalId);
@@ -95,6 +94,7 @@ export const updateProposal = async (req, res) => {
         // Only update the fields that are provided in the request
         if (title !== undefined) proposal.title = title;
         if (description !== undefined) proposal.description = description;
+        if (author !== undefined) proposal.author = author;
 
         await proposal.save(); // Save changes
 

@@ -42,14 +42,14 @@ export const loginUser = async (req, res) => {
 
         // Generate Access Token (Short-lived)
         const accessToken = jwt.sign(
-            { userId: user.id, username: user.username },
+            { userId: user.userId, username: user.username },
             process.env.JWT_SECRET,
             { expiresIn: "15m" }
         );
 
         // Generate Refresh Token (Long-lived)
         const refreshToken = jwt.sign(
-            { userId: user.id },
+            { userId: user.userId, username: user.username },
             process.env.JWT_REFRESH_SECRET,
             { expiresIn: "7d" }
         );
@@ -67,12 +67,15 @@ export const loginUser = async (req, res) => {
         // Send Access Token in response (not in cookie)
         res.json({
             accessToken,
-            userId: user.id,
+            userId: user.userId,
             username: user.username,
             email: user.email,
         });
     } catch (error) {
-        res.status(500).json({ error: "Internal server error", message: error.message });
+        res.status(500).json({
+            error: "Internal server error",
+            message: error.message,
+        });
     }
 };
 
@@ -80,23 +83,34 @@ export const refreshToken = (req, res) => {
     const { refreshToken } = req.cookies;
 
     if (!refreshToken) {
-        return res.status(401).json({ error: "Unauthorized: No refresh token" });
+        return res
+            .status(401)
+            .json({ error: "Unauthorized: No refresh token" });
     }
 
     try {
         // Verify Refresh Token
-        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        const decoded = jwt.verify(
+            refreshToken,
+            process.env.JWT_REFRESH_SECRET
+        );
 
         // Generate New Access Token
         const newAccessToken = jwt.sign(
-            { userId: decoded.userId },
+            { userId: decoded.userId, username: decoded.username },
             process.env.JWT_SECRET,
             { expiresIn: "15m" }
         );
 
-        res.json({ accessToken: newAccessToken });
+        res.json({
+            accessToken: newAccessToken,
+            userId: decoded.userId,
+            username: decoded.username,
+        });
     } catch (error) {
-        return res.status(403).json({ error: "Forbidden: Invalid refresh token" });
+        return res
+            .status(403)
+            .json({ error: "Forbidden: Invalid refresh token" });
     }
 };
 
@@ -110,10 +124,12 @@ export const getUserProfile = (req, res) => {
             email: req.user.email,
         });
     } catch (error) {
-        res.status(500).json({ error: "Internal server error", message: error.message });
+        res.status(500).json({
+            error: "Internal server error",
+            message: error.message,
+        });
     }
 };
-
 
 // Logout user
 export const logoutUser = (req, res) => {
@@ -121,10 +137,13 @@ export const logoutUser = (req, res) => {
         return res.status(401).json({ error: "Unauthorized" });
     }
 
-    res.clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "Strict" });
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Strict",
+    });
     res.json({ message: "Logged out successfully" });
 };
-
 
 // Register new user
 export const registerUser = async (req, res) => {

@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import "../css/Forum.css";
 import { api } from "../api";
+import useAuth from "../context/useAuth";
 
 // Import placeholder book cover
 import bookCoverImage from "../assets/placeholder-title.jpeg";
@@ -12,6 +13,9 @@ import avatarPic from "../assets/profile-placeholder.jpeg";
 function Forum() {
     const { proposalId } = useParams();
     const [error, setError] = useState("");
+    const { user } = useAuth();
+
+    // Extract userId of logged-in user
 
     // Placeholder data for the book discussion
     const bookTitle = "Educated";
@@ -59,7 +63,7 @@ function Forum() {
 
         const newCommentData = {
             proposalId: proposalId,
-            userId: 1,
+            userId: user.userId,
             content: newComment,
             timestamp: new Date(),
             avatar: avatarPic,

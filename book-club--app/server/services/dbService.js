@@ -89,12 +89,13 @@ export const createComment = async (
 };
 
 // Function to create a proposal
-export const createProposal = async (userId, title, description, week) => {
+export const createProposal = async (userId, title, description, author, week) => {
     try {
         return await Proposal.create({
             userId,
             title,
             description,
+            author,
             week,
         });
     } catch (error) {
@@ -113,14 +114,13 @@ export const getAllProposals = async () => {
 };
 
 // Function to find a proposal by week
-export const findProposalsByWeek = async (week, userId) => {
-    try {
-        return await Proposal.findAll({
-            where: { week, userId },
-        });
-    } catch (error) {
-        throw new Error("❌ Error fetching proposals: " + error.message);
-    }
+export const findProposalsByWeek = async (week, userId = null) => {
+    return Proposal.findAll({
+        where: {
+            week,
+            ...(userId && { userId }),
+        },
+    });
 };
 
 // Function to get all comments by user

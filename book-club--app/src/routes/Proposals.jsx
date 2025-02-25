@@ -1,79 +1,120 @@
 import { useState, useEffect } from "react";
 import { api } from "../api";
+import useAuth from "../context/useAuth";
 import bookCoverImage from "../assets/placeholder-title.jpeg";
 import "../css/Proposals.css";
 
 function Proposals() {
+    const { user, accessToken } = useAuth();
     const [isEditable, setIsEditable] = useState(false);
-    const [proposalId, setProposalId] = useState(null); // Store proposal ID
     const [image, setImage] = useState(null);
-    const [title, setTitle] = useState("Sample Title");
-    const [author, setAuthor] = useState("Sample Author");
-    const [introParagraph, setIntroParagraph] = useState(
-        "This is an introductory paragraph."
-    );
+    const [myProposal, setMyProposal] = useState({
+        title: "",
+        description: "",
+        author: "",
+        id: null,
+    });
+    const [proposals, setProposals] = useState([]);
+    const [voted, setVoted] = useState(null);
+    const [votes, setVotes] = useState([]);
     const [error, setError] = useState("");
 
-    // Sample proposals array (mock data)
-    const proposals = [
-        {
-            id: 1,
-            image: bookCoverImage,
-            title: "Proposal 1 Title",
-            author: "John Doe",
-            intro: "This is a short introduction to Proposal 1. It provides an overview of the topic being proposed.",
-        },
-        {
-            id: 2,
-            image: bookCoverImage,
-            title: "Proposal 2 Title",
-            author: "Jane Smith",
-            intro: "This is Proposal 2. It delves into a different topic, with a focus on its implications and outcomes.",
-        },
-        {
-            id: 3,
-            image: bookCoverImage,
-            title: "Proposal 3 Title",
-            author: "Emily Johnson",
-            intro: "Proposal 3 explores various approaches to solving a particular problem. It examines several case studies.",
-        },
-    ];
+    console.log("User:", user);
 
     useEffect(() => {
         const fetchProposal = async () => {
-            const token = sessionStorage.getItem("accessToken");
-            if (!token) {
-                setError("You must be logged in.");
-                return;
-            }
-
             try {
-                const userId = 1;
-                const response = await api.get(`/proposals/week?userId=${userId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                const response = await api.get(`/proposals/week`);
 
                 if (response.data.length > 0) {
-                    const userProposal = response.data[0]; // Assuming only one proposal per user per week
-                    console.log("User Proposal:", userProposal);
-                    setProposalId(userProposal.id);
-                    setTitle(userProposal.title);
-                    setIntroParagraph(userProposal.description);
+                    // find the user's proposal
+                    const userProposal = response.data.find(
+                        (proposal) => proposal.userId === user.userId
+                    );
+                    if (userProposal) {
+                        setMyProposal(userProposal);
+                    }
+                    // set the proposals excluding the user's proposal
+                    setProposals(
+                        response.data.filter(
+                            (proposal) => proposal.userId !== user.userId
+                        )
+                    );
                 }
             } catch (error) {
                 console.error("Error fetching proposal:", error);
             }
         };
 
+        const fetchVotes = async () => {
+            try {
+                const response = await api.get(`/votes/week`);
+
+                const fetchedVotes = response.data; // Store the fetched votes in a variable
+
+                setVotes(fetchedVotes); // Update state
+
+                // if the votes include the logged in user's vote, set the proposal as voted
+                if (fetchedVotes.find((vote) => vote.userId === user.userId)) {
+                    setVoted(fetchedVotes.find((vote) => vote.userId === user.userId).proposalId);
+                }
+            } catch (error) {
+                console.error("Error fetching votes:", error);
+            }
+        };
+
         fetchProposal();
+        fetchVotes();
+
     }, []);
+
+    const handleVoting = async (votedProposalId) => {
+        console.log("Voting for proposal:", votedProposalId);
+        const token = sessionStorage.getItem("accessToken");
+        if (!token) {
+            setError("You must be logged in.");
+            return;
+        }
+
+        console.log("Access Token:", token);
+
+        const voteData = {
+            userId: user.userId,
+            proposalId: votedProposalId,
+        };
+
+        try {
+            if (voted) {
+                // Patch vote
+                console.log("Updating vote:", voteData);
+                await api.patch(`/votes/week`, voteData, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setVoted(votedProposalId);
+            }else{
+                console.log("Creating new vote:", voteData);
+                // Create new vote
+                await api.post(`/proposals/vote`, voteData, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setVoted(votedProposalId);
+            }
+        } catch (error) {
+            console.error("Failed to save vote:", error);
+            setError("Failed to save vote.");
+        }
+    };
 
     const handleSaveProposal = async () => {
         setIsEditable(!isEditable);
         if (!isEditable) return;
 
-        if (title.trim() === "" || introParagraph.trim() === "") {
-            setError("Title and Introduction are required.");
+        if (
+            myProposal.title.trim() === "" ||
+            myProposal.description.trim() === "" ||
+            myProposal.author.trim() === ""
+        ) {
+            setError("Title, Author, and Description are required.");
             return;
         }
 
@@ -83,31 +124,42 @@ function Proposals() {
             return;
         }
 
+        console.log("Access Token:", token);
+
         const proposalData = {
-            title,
-            description: introParagraph,
+            userId: user.userId,
+            title: myProposal.title,
+            description: myProposal.description,
+            author: myProposal.author,
         };
 
         try {
-            if (proposalId) {
+            if (myProposal.id) {
                 // Update existing proposal
-                await api.patch(`/proposals/${proposalId}`, proposalData, {
+                await api.patch(`/proposals/${myProposal.id}`, proposalData, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
             } else {
                 // Create new proposal
+                console.log("Creating new proposal:", proposalData);
                 const response = await api.post(
                     "/proposal/post",
                     {
                         ...proposalData,
-                        week: 1, // Replace with correct week calculation
                     },
                     {
                         headers: { Authorization: `Bearer ${token}` },
                     }
                 );
 
-                setProposalId(response.data.id); // Save the new proposal ID
+                setMyProposal({
+                    ...myProposal,
+                    id: response.data.id,
+                    userId: response.data.userId,
+                    title: response.data.title,
+                    description: response.data.description,
+                    author: response.data.author,
+                });
             }
 
             console.log("Proposal saved successfully.");
@@ -164,11 +216,17 @@ function Proposals() {
                             {isEditable ? (
                                 <input
                                     id="title"
-                                    value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
+                                    value={myProposal?.title}
+                                    placeholder="Title"
+                                    onChange={(e) =>
+                                        setMyProposal({
+                                            ...myProposal,
+                                            title: e.target.value,
+                                        })
+                                    }
                                 />
                             ) : (
-                                <p>{title}</p>
+                                <p>{myProposal?.title || "Title here"}</p>
                             )}
                         </div>
 
@@ -178,11 +236,17 @@ function Proposals() {
                                 <input
                                     id="author"
                                     type="text"
-                                    value={author}
-                                    onChange={(e) => setAuthor(e.target.value)}
+                                    value={myProposal?.author}
+                                    placeholder="Author"
+                                    onChange={(e) =>
+                                        setMyProposal({
+                                            ...myProposal,
+                                            author: e.target.value,
+                                        })
+                                    }
                                 />
                             ) : (
-                                <p>{author}</p>
+                                <p>{myProposal?.author || "Author here"}</p>
                             )}
                         </div>
 
@@ -192,14 +256,21 @@ function Proposals() {
                             </label>
                             {isEditable ? (
                                 <textarea
-                                    id="introParagraph"
-                                    value={introParagraph}
+                                    id="description"
+                                    value={myProposal?.description}
+                                    placeholder="Description"
                                     onChange={(e) =>
-                                        setIntroParagraph(e.target.value)
+                                        setMyProposal({
+                                            ...myProposal,
+                                            description: e.target.value,
+                                        })
                                     }
                                 />
                             ) : (
-                                <p>{introParagraph}</p>
+                                <p>
+                                    {myProposal?.description ||
+                                        "Description here"}
+                                </p>
                             )}
                         </div>
 
@@ -225,7 +296,7 @@ function Proposals() {
                         <div className="proposal-item" key={proposal.id}>
                             <div className="proposal-image">
                                 <img
-                                    src={proposal.image}
+                                    src={bookCoverImage}
                                     alt="Proposal Image"
                                     className="proposal-img"
                                 />
@@ -233,10 +304,16 @@ function Proposals() {
                             <div className="proposal-info">
                                 <h3>{proposal.title}</h3>
                                 <p>Author: {proposal.author}</p>
-                                <p>{proposal.intro}</p>
+                                <p>{proposal.description}</p>
+                                <p> Total votes: {votes.filter((vote) => vote.proposalId === proposal.id).length}</p>
                             </div>
                             <div className="proposal-vote">
-                                <button className="vote-button">Vote</button>
+                                <button className="vote-button"
+                                onClick={() => handleVoting(proposal.id)}
+                                disabled={voted === proposal.id}
+                                >
+                                    {voted === proposal.id ? "You Voted This" : "Vote"}
+                                </button>
                             </div>
                         </div>
                     ))}

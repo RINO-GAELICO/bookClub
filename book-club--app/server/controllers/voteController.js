@@ -1,3 +1,4 @@
+import { ProposalVote } from "../models/ProposalVote.js";
 import {
     createVote,
     getVotesByWeek,
@@ -5,10 +6,12 @@ import {
     getVotesByUser,
     updateVote,
 } from "../services/dbService.js";
+import { getCurrentWeek } from "../utils.js";
 
 // Function to create a vote
 export const postVote = async (req, res) => {
-    const { userId, proposalId, week } = req.body;
+    const { userId, proposalId } = req.body;
+    const week = getCurrentWeek();
 
     try {
         await createVote(userId, proposalId, week);
@@ -20,7 +23,8 @@ export const postVote = async (req, res) => {
 
 // Function to get votes by week
 export const getVotesByWeekController = async (req, res) => {
-    const { week } = req.params;
+    // Get the current week
+    const week = getCurrentWeek();
 
     try {
         const votes = await getVotesByWeek(week);
@@ -56,12 +60,27 @@ export const getVotesByUserController = async (req, res) => {
 
 // Function to update a vote
 export const updateVoteController = async (req, res) => {
-    const { userId, week } = req.params;
-    const { proposalId } = req.body;
+    const { userId, proposalId } = req.body;
+
+    const week = getCurrentWeek();
 
     try {
-        const updatedVote = await updateVote(userId, proposalId, week);
-        res.json({ message: "Vote updated successfully", vote: updatedVote });
+        const vote = await ProposalVote.findOrCreate({
+            where: { userId, week },
+            defaults: { proposalId }, // Sets this if a new record is created
+        });
+
+        // If the vote already exists, update the proposalId
+        if (!vote[1]) {
+            await ProposalVote.update(
+                { proposalId },
+                {
+                    where: { userId, week },
+                }
+            );
+        }
+
+        return res.status(200).json(vote);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

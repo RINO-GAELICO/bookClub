@@ -11,7 +11,12 @@
     "sequelize": "node --loader ts-node/esm node_modules/.bin/sequelize"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@headlessui/react": "^2.2.0",
     "@mantine/hooks": "^7.16.3",
+    "@mui/icons-material": "^6.4.5",
+    "@mui/material": "^6.4.5",
     "@tailwindcss/vite": "^4.0.6",
     "axios": "^1.7.9",
     "bcryptjs": "^3.0.1",

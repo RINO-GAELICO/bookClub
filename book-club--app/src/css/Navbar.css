@@ -11,3 +11,11 @@ a.active {
 .hamburger {
     background-color: #5865f2;
 }
+
+/* Ensure the backdrop doesn't show up at all */
+.MuiMenu-list {
+    background-color: #1a1a1a;
+    color: white;
+    font-size: 1em;
+    font-weight: 500;
+  }

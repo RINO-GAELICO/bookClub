@@ -9,7 +9,7 @@ function Home() {
     const bookAuthor = "Tara Westover";
     const bookDescription = "Educated is a memoir by the American author Tara Westover. It details her journey from growing up in a strict household in rural Idaho and not attending school, to eventually earning a PhD from the University of Cambridge.";
 
-    const bookId = "123"; // Placeholder book ID
+    const bookId = "1"; // Placeholder book ID
 
     return (
         <div className="hero-background">

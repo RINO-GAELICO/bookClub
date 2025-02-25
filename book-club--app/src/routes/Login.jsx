@@ -26,11 +26,13 @@ export default function Login() {
 
             const { accessToken, ...user } = response.data;
             login(user, accessToken);
+            console.log(`User logged in: ${user}`);
+            console.log(`Access Token: ${accessToken}`);
             setError("");
             navigate("/");
         } catch (error) {
             setError(
-                error.message || "Something went wrong. Please try again."
+                "Invalid email or password."
             );
         }
     };
