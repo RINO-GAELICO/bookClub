@@ -32,6 +32,9 @@ app.use(cookieParser());
 // Authentication Routes
 app.use("/api", authRoutes);
 
+// Serve Static Files
+app.use("/uploads", express.static("uploads"));
+
 // Import routes
 app.use("/api", userRoutes);
 app.use("/api", proposalRoutes);

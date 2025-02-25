@@ -8,6 +8,7 @@ function Proposals() {
     const { user, accessToken } = useAuth();
     const [isEditable, setIsEditable] = useState(false);
     const [image, setImage] = useState(null);
+    const [imageFile, setImageFile] = useState(null);
     const [myProposal, setMyProposal] = useState({
         title: "",
         description: "",
@@ -56,7 +57,10 @@ function Proposals() {
 
                 // if the votes include the logged in user's vote, set the proposal as voted
                 if (fetchedVotes.find((vote) => vote.userId === user.userId)) {
-                    setVoted(fetchedVotes.find((vote) => vote.userId === user.userId).proposalId);
+                    setVoted(
+                        fetchedVotes.find((vote) => vote.userId === user.userId)
+                            .proposalId
+                    );
                 }
             } catch (error) {
                 console.error("Error fetching votes:", error);
@@ -65,7 +69,6 @@ function Proposals() {
 
         fetchProposal();
         fetchVotes();
-
     }, []);
 
     const handleVoting = async (votedProposalId) => {
@@ -91,7 +94,7 @@ function Proposals() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setVoted(votedProposalId);
-            }else{
+            } else {
                 console.log("Creating new vote:", voteData);
                 // Create new vote
                 await api.post(`/proposals/vote`, voteData, {
@@ -126,32 +129,40 @@ function Proposals() {
 
         console.log("Access Token:", token);
 
-        const proposalData = {
-            userId: user.userId,
-            title: myProposal.title,
-            description: myProposal.description,
-            author: myProposal.author,
-        };
+        // Create FormData to send image file and text fields
+        const formData = new FormData();
+        formData.append("userId", user.userId);
+        formData.append("title", myProposal.title);
+        formData.append("description", myProposal.description);
+        formData.append("author", myProposal.author);
+        if (imageFile) {
+            formData.append("image", imageFile); // Attach image if available
+        }
 
         try {
+            let response;
             if (myProposal.id) {
                 // Update existing proposal
-                await api.patch(`/proposals/${myProposal.id}`, proposalData, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-            } else {
-                // Create new proposal
-                console.log("Creating new proposal:", proposalData);
-                const response = await api.post(
-                    "/proposal/post",
+                response = await api.patch(
+                    `/proposals/${myProposal.id}`,
+                    formData,
                     {
-                        ...proposalData,
-                    },
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "multipart/form-data",
+                        },
                     }
                 );
+            } else {
+                // Create new proposal
+                response = await api.post("/proposals", formData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
+                    },
+                });
 
+                // Set new proposal data
                 setMyProposal({
                     ...myProposal,
                     id: response.data.id,
@@ -159,6 +170,7 @@ function Proposals() {
                     title: response.data.title,
                     description: response.data.description,
                     author: response.data.author,
+                    imageUrl: response.data.imageUrl, // Store returned image URL
                 });
             }
 
@@ -174,6 +186,7 @@ function Proposals() {
         const file = event.target.files[0];
         if (file) {
             setImage(URL.createObjectURL(file)); // Set the uploaded image
+            setImageFile(file); // Store file for upload
         }
     };
 
@@ -190,7 +203,11 @@ function Proposals() {
                         <div className="image-frame">
                             {image ? (
                                 <img
-                                    src={image}
+                                    src={
+                                        image ||
+                                        myProposal.imageUrl ||
+                                        bookCoverImage
+                                    }
                                     alt="Book"
                                     className="book-image"
                                 />
@@ -200,14 +217,16 @@ function Proposals() {
                         </div>
 
                         {/* Upload Button */}
-                        {!image && (
-                            <button
-                                className="upload-button"
-                                onClick={handleImageUpload}
-                            >
-                                Upload Image
-                            </button>
-                        )}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            style={{ display: "none" }}
+                            id="imageUpload"
+                        />
+                        <label htmlFor="imageUpload" className="upload-button">
+                            Upload Image
+                        </label>
                     </div>
 
                     <div className="presentation-section">
@@ -296,7 +315,7 @@ function Proposals() {
                         <div className="proposal-item" key={proposal.id}>
                             <div className="proposal-image">
                                 <img
-                                    src={bookCoverImage}
+                                    src={proposal.imageUrl || bookCoverImage}
                                     alt="Proposal Image"
                                     className="proposal-img"
                                 />
@@ -305,14 +324,26 @@ function Proposals() {
                                 <h3>{proposal.title}</h3>
                                 <p>Author: {proposal.author}</p>
                                 <p>{proposal.description}</p>
-                                <p> Total votes: {votes.filter((vote) => vote.proposalId === proposal.id).length}</p>
+                                <p>
+                                    {" "}
+                                    Total votes:{" "}
+                                    {
+                                        votes.filter(
+                                            (vote) =>
+                                                vote.proposalId === proposal.id
+                                        ).length
+                                    }
+                                </p>
                             </div>
                             <div className="proposal-vote">
-                                <button className="vote-button"
-                                onClick={() => handleVoting(proposal.id)}
-                                disabled={voted === proposal.id}
+                                <button
+                                    className="vote-button"
+                                    onClick={() => handleVoting(proposal.id)}
+                                    disabled={voted === proposal.id}
                                 >
-                                    {voted === proposal.id ? "You Voted This" : "Vote"}
+                                    {voted === proposal.id
+                                        ? "You Voted This"
+                                        : "Vote"}
                                 </button>
                             </div>
                         </div>

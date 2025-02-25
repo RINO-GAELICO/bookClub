@@ -13,6 +13,8 @@ const Proposal = sequelize.define("Proposal", {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
+    imageUrl: { type: DataTypes.STRING, allowNull: true }, // Stores the original image URL
+    thumbnailUrl: { type: DataTypes.STRING, allowNull: true } // Stores the thumbnail URL
 });
 
 export { Proposal };

@@ -3,9 +3,7 @@ import express from "express";
 import { body } from "express-validator";
 import {
     getUsers,
-    loginUser,
     registerUser,
-    logoutUser
 } from "../controllers/userController.js";
 
 const router = express.Router();

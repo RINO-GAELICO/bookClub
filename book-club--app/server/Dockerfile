@@ -7,17 +7,17 @@ RUN apt-get update && apt-get install -y postgresql-client
 # Set working directory inside the container
 WORKDIR /app
 
-# Copy only the server directory
-COPY package.json package-lock.json ./
+# Copy only backend-specific package.json and package-lock.json
+COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy the rest of the server code (excluding unnecessary files)
-COPY server ./
+COPY . .
 
 # Expose the server port
 EXPOSE 5000
 
 # Start the server
-CMD ["node", "server/server.js"]
+CMD ["node", "server.js"]

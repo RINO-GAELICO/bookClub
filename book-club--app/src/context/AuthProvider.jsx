@@ -59,10 +59,11 @@ export const AuthProvider = ({ children }) => {
                 headers: { Authorization: `Bearer ${accessToken}` },
                 withCredentials: true,
             });
-
             if (response.status === 200) {
                 setUser(response.data);
                 localStorage.setItem("user", JSON.stringify(response.data));
+            }else{
+                logout();
             }
         } catch (error) {
             console.error("Failed to fetch user data:", error);

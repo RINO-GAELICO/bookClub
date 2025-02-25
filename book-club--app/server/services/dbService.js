@@ -3,8 +3,10 @@ import { User } from "../models/Users.js";
 import { Comment } from "../models/Comments.js";
 import { Proposal } from "../models/Proposals.js";
 import { ProposalVote } from "../models/ProposalVote.js";
-// import { Op } from "sequelize";
 import bcrypt from "bcryptjs";
+import path from "path";
+import { generateThumbnail } from "../middleware/imageService.js";
+
 
 export const getAllUsers = async () => {
     try {
@@ -88,20 +90,44 @@ export const createComment = async (
     }
 };
 
-// Function to create a proposal
-export const createProposal = async (userId, title, description, author, week) => {
+
+export const createProposal = async (userId, title, description, author, week, imagePath) => {
     try {
+        let thumbnailPath = null;
+
+        if (imagePath) {
+            const filename = path.basename(imagePath);
+            thumbnailPath = await generateThumbnail(imagePath, filename);
+        }
+
         return await Proposal.create({
             userId,
             title,
             description,
             author,
             week,
+            imageUrl: imagePath, // Store original image path
+            thumbnailUrl: thumbnailPath, // Store generated thumbnail path
         });
     } catch (error) {
         throw new Error("❌ Error posting proposal: " + error.message);
     }
 };
+
+// // Function to create a proposal
+// export const createProposal = async (userId, title, description, author, week) => {
+//     try {
+//         return await Proposal.create({
+//             userId,
+//             title,
+//             description,
+//             author,
+//             week,
+//         });
+//     } catch (error) {
+//         throw new Error("❌ Error posting proposal: " + error.message);
+//     }
+// };
 
 // Function to get all proposals
 export const getAllProposals = async () => {

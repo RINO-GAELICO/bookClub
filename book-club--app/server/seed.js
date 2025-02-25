@@ -1,7 +1,7 @@
-import { User } from './server/models/Users.js';
-import { Proposal } from './server/models/Proposals.js';
-import { Comment } from './server/models/Comments.js';
-import { ProposalVote } from './server/models/ProposalVote.js';
+import { User } from './models/Users.js';
+import { Proposal } from './models/Proposals.js';
+import { Comment } from './models/Comments.js';
+import { ProposalVote } from './models/ProposalVote.js';
 import bcrypt from 'bcryptjs';
 
 // Seed function

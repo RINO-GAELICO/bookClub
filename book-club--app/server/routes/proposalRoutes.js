@@ -8,11 +8,12 @@ import { getProposals,
     getProposalsByCurrentWeek
  } from "../controllers/proposalController.js";
 import authenticateToken from "../middleware/authenticateToken.js";
+import upload from "../middleware/imageService.js";
 
 const router = express.Router();
 
 // Post a new proposal
-router.post("/proposal/post", authenticateToken, postProposal);
+router.post("/proposal/post", authenticateToken, upload.single("image"), postProposal);
 
 // Get all proposals
 router.get("/proposals", getProposals);

@@ -14,20 +14,20 @@ import { Proposal } from "../models/Proposals.js";
 
 
 
-// Post a new proposal
-export const postProposal = async (req, res) => {
-    const { userId, title, description, author } = req.body;
+// // Post a new proposal
+// export const postProposal = async (req, res) => {
+//     const { userId, title, description, author } = req.body;
 
-    // Get the current week
-    const week = getCurrentWeek();
+//     // Get the current week
+//     const week = getCurrentWeek();
 
-    try {
-        const newProposal = await createProposal(userId, title, description, author, week);
-        res.status(201).json(newProposal);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
+//     try {
+//         const newProposal = await createProposal(userId, title, description, author, week);
+//         res.status(201).json(newProposal);
+//     } catch (error) {
+//         res.status(400).json({ error: error.message });
+//     }
+// };
 
 // Get all proposals
 export const getProposals = async (req, res) => {
@@ -79,10 +79,27 @@ export const getProposalsByUser = async (req, res) => {
     }
 };
 
+// Post a new proposal
+export const postProposal = async (req, res) => {
+    try {
+        const { userId, title, description, author } = req.body;
+        const imagePath = req.file ? req.file.path : null; // Get uploaded image path
+
+        const week = getCurrentWeek();
+
+        const proposal = await createProposal(userId, title, description, author, week, imagePath);
+        return res.status(201).json(proposal);
+    } catch (error) {
+        console.error("Error creating proposal:", error);
+        return res.status(500).json({ error: "Failed to create proposal" });
+    }
+};
+
 // Update a proposal
 export const updateProposal = async (req, res) => {
     const { proposalId } = req.params;
     const { title, description, author } = req.body;
+    const imagePath = req.file ? req.file.path : null; // Get uploaded image path
 
     try {
         const proposal = await Proposal.findByPk(proposalId);
@@ -95,6 +112,7 @@ export const updateProposal = async (req, res) => {
         if (title !== undefined) proposal.title = title;
         if (description !== undefined) proposal.description = description;
         if (author !== undefined) proposal.author = author;
+        if (imagePath !== null) proposal.imageUrl = imagePath;
 
         await proposal.save(); // Save changes
 

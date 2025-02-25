@@ -13,6 +13,7 @@ const authenticateToken = (req, res, next) => {
             return res.status(403).json({ error: 'Forbidden' });
         }
         req.user = user; // Attach user data to the request object
+        console.log(`Authenticated user: ${JSON.stringify(user)}`);
         next();
     });
 };
