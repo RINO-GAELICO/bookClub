@@ -1,10 +1,7 @@
 // routes/userRoutes.js
 import express from "express";
 import { body } from "express-validator";
-import {
-    getUsers,
-    registerUser,
-} from "../controllers/userController.js";
+import { getUsers, registerUser } from "../controllers/userController.js";
 
 const router = express.Router();
 
@@ -12,18 +9,6 @@ const router = express.Router();
 router.get("/users", getUsers);
 
 // Register new user
-router.post(
-    "/users/register",
-    [
-        body("email").isEmail().withMessage("Invalid email format"),
-        body("username")
-            .isLength({ min: 3 })
-            .withMessage("Username must be at least 3 characters"),
-        body("password")
-            .isLength({ min: 4 })
-            .withMessage("Password must be at least 4 characters"),
-    ],
-    registerUser
-);
+router.post("/users/register", registerUser);
 
 export default router;

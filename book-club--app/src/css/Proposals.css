@@ -59,7 +59,8 @@
 .upload-button {
     margin-top: 10px;
     padding: 8px 16px;
-    background-color: #007bff;
+    background-color: #5865f2;
+    font-weight: 500;
     color: white;
     border: none;
     border-radius: 4px;
@@ -67,7 +68,7 @@
 }
 
 .upload-button:hover {
-    background-color: #0056b3;
+    background-color: #3f48ae;
 }
 
 .book-image {
@@ -117,7 +118,7 @@
 
 button {
     padding: 10px 15px;
-    background-color: #007bff;
+    background-color: #5865f2;
     color: white;
     border: none;
     cursor: pointer;
@@ -125,7 +126,7 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #3f48ae;
 }
 
 .other-proposals-container{

@@ -8,7 +8,7 @@ import { getProposals,
     getProposalsByCurrentWeek
  } from "../controllers/proposalController.js";
 import authenticateToken from "../middleware/authenticateToken.js";
-import upload from "../middleware/imageService.js";
+import {upload} from "../middleware/imageService.js";
 
 const router = express.Router();
 
@@ -28,7 +28,7 @@ router.get("/proposals/week", getProposalsByCurrentWeek);
 router.get("/proposals/:proposalId", getProposalById);
 
 // Update a proposal
-router.patch("/proposals/:proposalId", authenticateToken, updateProposal);
+router.patch("/proposals/:proposalId", authenticateToken, upload.single("image"), updateProposal);
 
 // Delete a proposal
 router.delete("/proposals/:proposalId", deleteProposal);

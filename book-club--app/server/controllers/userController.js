@@ -8,6 +8,8 @@ import {
 } from "../services/dbService.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { validationResult } from "express-validator";
+import { User } from "../models/Users.js";
 
 // Get all users
 export const getUsers = async (req, res) => {
@@ -40,19 +42,7 @@ export const loginUser = async (req, res) => {
             return res.status(400).json({ error: "Invalid credentials" });
         }
 
-        // Generate Access Token (Short-lived)
-        const accessToken = jwt.sign(
-            { userId: user.userId, username: user.username },
-            process.env.JWT_SECRET,
-            { expiresIn: "15m" }
-        );
-
-        // Generate Refresh Token (Long-lived)
-        const refreshToken = jwt.sign(
-            { userId: user.userId, username: user.username },
-            process.env.JWT_REFRESH_SECRET,
-            { expiresIn: "7d" }
-        );
+        const { accessToken, refreshToken } = getAccesAndRefreshToken(user);
 
         logger.info(`User ${user.username} logged in`);
 
@@ -77,6 +67,24 @@ export const loginUser = async (req, res) => {
             message: error.message,
         });
     }
+};
+
+export const getAccesAndRefreshToken = (user) => {
+    // Generate Access Token (Short-lived)
+    const accessToken = jwt.sign(
+        { userId: user.userId, username: user.username },
+        process.env.JWT_SECRET,
+        { expiresIn: "15m" }
+    );
+
+    // Generate Refresh Token (Long-lived)
+    const refreshToken = jwt.sign(
+        { userId: user.userId, username: user.username },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: "7d" }
+    );
+
+    return { accessToken, refreshToken };
 };
 
 export const refreshToken = (req, res) => {
@@ -145,14 +153,44 @@ export const logoutUser = (req, res) => {
     res.json({ message: "Logged out successfully" });
 };
 
-// Register new user
 export const registerUser = async (req, res) => {
-    const { email, username, password } = req.body;
-
     try {
-        const newUser = await registerNewUser(email, username, password);
-        res.status(201).json(newUser);
+        const { username, email, password } = req.body;
+
+        // Debugging: Check received values
+        console.log("Received data:", req.body);
+
+        // Ensure email lookup is correct
+        const existingUser = await User.findOne({ where: { email } });
+
+        if (existingUser) {
+            return res.status(400).json({ error: "Email is already in use." });
+        }
+
+        // Create and save the new user
+        const newUser = await User.create({ username, email, password });
+
+        const { accessToken, refreshToken } = getAccesAndRefreshToken(newUser);
+
+        logger.info(`User ${newUser.username} logged in`);
+
+        // Store Refresh Token in HTTP-only Cookie
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
+
+        // Send Access Token in response (not in cookie)
+        res.status(201).json({
+            accessToken,
+            userId: newUser.userId,
+            username: newUser.username,
+            email: newUser.email,
+        });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        console.error("Error registering user:", error);
+        return res.status(500).json({ error: "Internal server error" });
     }
 };

@@ -15,6 +15,8 @@ export const postVote = async (req, res) => {
 
     try {
         await createVote(userId, proposalId, week);
+        const votes = await getVotesByWeek(week);
+        io.emit("voteUpdated", { newVotes: votes });
         res.status(201).json({ message: "Vote created successfully" });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -79,6 +81,9 @@ export const updateVoteController = async (req, res) => {
                 }
             );
         }
+
+        const votes = await getVotesByWeek(week);
+        io.emit("voteUpdated", { newVotes: votes });
 
         return res.status(200).json(vote);
     } catch (error) {

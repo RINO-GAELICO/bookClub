@@ -2,7 +2,7 @@ import { User } from './models/Users.js';
 import { Proposal } from './models/Proposals.js';
 import { Comment } from './models/Comments.js';
 import { ProposalVote } from './models/ProposalVote.js';
-import bcrypt from 'bcryptjs';
+
 
 // Seed function
 async function seedDatabase() {
@@ -14,13 +14,13 @@ async function seedDatabase() {
     });
 
     const user2 = await User.create({
-        email: 'user2@example.com',
+        email: 'user2@email.com',
         username: 'user2',
         password: 'pass',
     });
 
     const user3 = await User.create({
-        email: 'user3@example.com',
+        email: 'user3@email.com',
         username: 'user3',
         password: 'pass',
     });

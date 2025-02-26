@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import { api } from "../api";
 import useAuth from "../context/useAuth";
-import bookCoverImage from "../assets/placeholder-title.jpeg";
+import bookCoverPlaceHolder from "../assets/placeholder-no-title.jpeg";
 import "../css/Proposals.css";
+import { io } from "socket.io-client";
+const SOCKET_URL = import.meta.env.VITE_BACKEND_SOCKET_URL;
+
+const socket = io(SOCKET_URL);
 
 function Proposals() {
     const { user, accessToken } = useAuth();
@@ -14,15 +18,38 @@ function Proposals() {
         description: "",
         author: "",
         id: null,
+        thumbnailUrl: null,
+        imageUrl: null,
     });
     const [proposals, setProposals] = useState([]);
     const [voted, setVoted] = useState(null);
     const [votes, setVotes] = useState([]);
     const [error, setError] = useState("");
 
+    const fetchVotes = async () => {
+        try {
+            const response = await api.get(`/votes/week`);
+
+            const fetchedVotes = response.data; // Store the fetched votes in a variable
+
+            setVotes(fetchedVotes); // Update state
+
+            // if the votes include the logged in user's vote, set the proposal as voted
+            if (fetchedVotes.find((vote) => vote.userId === user.userId)) {
+                setVoted(
+                    fetchedVotes.find((vote) => vote.userId === user.userId)
+                        .proposalId
+                );
+            }
+        } catch (error) {
+            console.error("Error fetching votes:", error);
+        }
+    };
+
     console.log("User:", user);
 
     useEffect(() => {
+        if (!user || !user.userId) return;
         const fetchProposal = async () => {
             try {
                 const response = await api.get(`/proposals/week`);
@@ -47,39 +74,37 @@ function Proposals() {
             }
         };
 
-        const fetchVotes = async () => {
-            try {
-                const response = await api.get(`/votes/week`);
-
-                const fetchedVotes = response.data; // Store the fetched votes in a variable
-
-                setVotes(fetchedVotes); // Update state
-
-                // if the votes include the logged in user's vote, set the proposal as voted
-                if (fetchedVotes.find((vote) => vote.userId === user.userId)) {
-                    setVoted(
-                        fetchedVotes.find((vote) => vote.userId === user.userId)
-                            .proposalId
-                    );
-                }
-            } catch (error) {
-                console.error("Error fetching votes:", error);
-            }
-        };
-
         fetchProposal();
         fetchVotes();
-    }, []);
+
+        // Listen for real-time image updates
+        socket.on("imageUpdated", ({ proposalId, imageUrl }) => {
+            setProposals((prevProposals) =>
+                prevProposals.map((proposal) =>
+                    proposal.id == proposalId
+                        ? { ...proposal, imageUrl }
+                        : proposal
+                )
+            );
+        });
+
+        // Listen for real-time vote updates
+        socket.on("voteUpdated", ({ newVotes }) => {
+            setVotes(newVotes);
+        });
+
+        return () => {
+            socket.off("imageUpdated");
+            socket.off("voteUpdated");
+        };
+    }, [user]);
 
     const handleVoting = async (votedProposalId) => {
-        console.log("Voting for proposal:", votedProposalId);
         const token = sessionStorage.getItem("accessToken");
         if (!token) {
             setError("You must be logged in.");
             return;
         }
-
-        console.log("Access Token:", token);
 
         const voteData = {
             userId: user.userId,
@@ -89,13 +114,11 @@ function Proposals() {
         try {
             if (voted) {
                 // Patch vote
-                console.log("Updating vote:", voteData);
                 await api.patch(`/votes/week`, voteData, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setVoted(votedProposalId);
             } else {
-                console.log("Creating new vote:", voteData);
                 // Create new vote
                 await api.post(`/proposals/vote`, voteData, {
                     headers: { Authorization: `Bearer ${token}` },
@@ -106,6 +129,7 @@ function Proposals() {
             console.error("Failed to save vote:", error);
             setError("Failed to save vote.");
         }
+        fetchVotes();
     };
 
     const handleSaveProposal = async () => {
@@ -135,6 +159,7 @@ function Proposals() {
         formData.append("title", myProposal.title);
         formData.append("description", myProposal.description);
         formData.append("author", myProposal.author);
+        console.log("Author:", myProposal.author);
         if (imageFile) {
             formData.append("image", imageFile); // Attach image if available
         }
@@ -155,7 +180,7 @@ function Proposals() {
                 );
             } else {
                 // Create new proposal
-                response = await api.post("/proposals", formData, {
+                response = await api.post("/proposal/post", formData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "multipart/form-data",
@@ -171,6 +196,7 @@ function Proposals() {
                     description: response.data.description,
                     author: response.data.author,
                     imageUrl: response.data.imageUrl, // Store returned image URL
+                    thumbnailUrl: response.data.thumbnailUrl, // Store returned thumbnail URL
                 });
             }
 
@@ -201,19 +227,15 @@ function Proposals() {
                     <div className="image-container">
                         {/* Book Image or Empty Frame */}
                         <div className="image-frame">
-                            {image ? (
-                                <img
-                                    src={
-                                        image ||
-                                        myProposal.imageUrl ||
-                                        bookCoverImage
-                                    }
-                                    alt="Book"
-                                    className="book-image"
-                                />
-                            ) : (
-                                <div className="empty-frame">No Image</div>
-                            )}
+                            <img
+                                src={
+                                    image ||
+                                    myProposal.imageUrl ||
+                                    bookCoverPlaceHolder
+                                }
+                                alt="Book"
+                                className="book-image"
+                            />
                         </div>
 
                         {/* Upload Button */}
@@ -225,7 +247,9 @@ function Proposals() {
                             id="imageUpload"
                         />
                         <label htmlFor="imageUpload" className="upload-button">
-                            Upload Image
+                            {myProposal.imageUrl
+                                ? "Change Image"
+                                : "Upload Image"}
                         </label>
                     </div>
 
@@ -315,7 +339,10 @@ function Proposals() {
                         <div className="proposal-item" key={proposal.id}>
                             <div className="proposal-image">
                                 <img
-                                    src={proposal.imageUrl || bookCoverImage}
+                                    src={
+                                        proposal.thumbnailUrl ||
+                                        bookCoverPlaceHolder
+                                    }
                                     alt="Proposal Image"
                                     className="proposal-img"
                                 />

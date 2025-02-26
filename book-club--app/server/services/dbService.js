@@ -114,21 +114,6 @@ export const createProposal = async (userId, title, description, author, week, i
     }
 };
 
-// // Function to create a proposal
-// export const createProposal = async (userId, title, description, author, week) => {
-//     try {
-//         return await Proposal.create({
-//             userId,
-//             title,
-//             description,
-//             author,
-//             week,
-//         });
-//     } catch (error) {
-//         throw new Error("❌ Error posting proposal: " + error.message);
-//     }
-// };
-
 // Function to get all proposals
 export const getAllProposals = async () => {
     try {

@@ -10,8 +10,9 @@ import proposalRoutes from "./routes/proposalRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
 import voteRoutes from "./routes/voteRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-
-
+import path from "path";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 // Load environment variables from .env file (Docker will inject them)
 dotenv.config();
@@ -19,27 +20,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors(
-    {
-        origin: "http://localhost:5173",
-        credentials: true,
-    }
-));
+// Middleware setup first (before routes)
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+}));
 
 app.use(express.json());
 app.use(cookieParser());
-
-// Authentication Routes
-app.use("/api", authRoutes);
-
-// Serve Static Files
-app.use("/uploads", express.static("uploads"));
-
-// Import routes
-app.use("/api", userRoutes);
-app.use("/api", proposalRoutes);
-app.use("/api", commentRoutes);
-app.use("/api", voteRoutes);
 
 app.use(
     morgan("combined", {
@@ -52,22 +40,56 @@ app.use(
     })
 );
 
-app.use((err, req, res) => {
-    console.error(err.stack); // Logs error in the console
-    logger.error(err.stack); // Logs error in the log file
-    res.status(err.status || 500).json({
-        error: err.message || "Internal Server Error",
+// Authentication Routes
+app.use("/api", authRoutes);
+
+// Serve static files (uploaded images)
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+app.use("/uploads/thumbnails", express.static(path.join(process.cwd(), "uploads/thumbnails")));
+
+// Import routes
+app.use("/api", userRoutes);
+app.use("/api", proposalRoutes);
+app.use("/api", commentRoutes);
+app.use("/api", voteRoutes);
+
+// Create HTTP server for Socket.IO integration
+const server = createServer(app);
+
+// Set up WebSocket server (after Express and middleware)
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:5173", // Allow your frontend
+        methods: ["GET", "POST"],
+    },
+});
+
+// Debugging connection
+console.log('Socket.IO server is initialized and waiting for connections...');
+
+// Listen for WebSocket connections
+io.on("connection", (socket) => {
+    console.log("User connected:", socket.id); // Logs connection event
+
+    // When user disconnects
+    socket.on("disconnect", () => {
+        console.log("User disconnected:", socket.id); // Logs disconnection event
     });
 });
+
+// Export io for use in controllers
+export { io };
 
 // Sync Database (Create tables if not exists)
 const startServer = async () => {
     try {
         await sequelize.sync({ alter: true }); // Auto-sync models
         console.log("✅ Database synced!");
-        app.listen(PORT, () =>
-            console.log(`🚀 Server running on http://localhost:${PORT}`)
-        );
+
+        // Now start the server
+        server.listen(PORT, () => {
+            console.log(`🚀 Server running on http://localhost:${PORT}`);
+        });
     } catch (error) {
         console.error("❌ Failed to start server:", error);
     }

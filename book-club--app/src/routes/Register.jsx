@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../context/useAuth";
+import { api } from "../api";
 
 const Register = () => {
     const [username, setUsername] = useState("");
@@ -8,43 +9,35 @@ const Register = () => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login } = useAuth(); // Assuming you have a login function for managing the session
 
     const handleRegister = async (e) => {
         e.preventDefault();
 
         try {
-            // Fetch mock data (can be replaced with API later)
-            const response = await fetch("/src/mockData/users.json");
-            const users = await response.json();
-
-            // Check if email or username already exists
-            const userExists = users.some(
-                (user) => user.email === email || user.username === username
+            const response = await api.post(
+                "/users/register",
+                { username, email, password },
+                { headers: { "Content-Type": "application/json" } }
             );
 
-            if (userExists) {
-                setError("Username or email already exists.");
+            if (response.status === 201) {
+                const { accessToken, ...user } = response.data;
+                login(user, accessToken);
+                setError("");
+                navigate("/");
             } else {
-                // Create new user
-                const newUser = { username, email, password };
-                users.push(newUser);
-
-                // Save mock data (for now, we won't persist it on the backend)
-                await fetch("/src/mockData/users.json", {
-                    method: "POST",
-                    body: JSON.stringify(users),
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                });
-
-                login(newUser); // Log in the newly registered user
-                navigate("/forum"); // Redirect to the forum after successful registration
+                setError(
+                    response.data.error ||
+                        "Something went wrong, please try again."
+                );
             }
         } catch (err) {
             console.error("Error:", err);
-            setError("Something went wrong. Please try again.");
+            setError(
+                err.response?.data?.error ||
+                    "Something went wrong. Please try again."
+            );
         }
     };
 

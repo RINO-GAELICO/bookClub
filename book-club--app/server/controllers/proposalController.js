@@ -1,33 +1,17 @@
-
 import {
     createProposal,
     getAllProposals,
     findProposalById,
     findProposalsByUser,
     removeProposal,
-    findProposalsByWeek
-
+    findProposalsByWeek,
 } from "../services/dbService.js";
+import { generateThumbnail } from "../middleware/imageService.js";
 
 import { getCurrentWeek } from "../utils.js";
 import { Proposal } from "../models/Proposals.js";
-
-
-
-// // Post a new proposal
-// export const postProposal = async (req, res) => {
-//     const { userId, title, description, author } = req.body;
-
-//     // Get the current week
-//     const week = getCurrentWeek();
-
-//     try {
-//         const newProposal = await createProposal(userId, title, description, author, week);
-//         res.status(201).json(newProposal);
-//     } catch (error) {
-//         res.status(400).json({ error: error.message });
-//     }
-// };
+import { io } from "../server.js";
+import path from "path";
 
 // Get all proposals
 export const getProposals = async (req, res) => {
@@ -41,7 +25,6 @@ export const getProposals = async (req, res) => {
 
 // Get proposals by week and user
 export const getProposalsByCurrentWeek = async (req, res) => {
-
     const { userId } = req.query;
 
     const currentWeek = getCurrentWeek();
@@ -49,7 +32,9 @@ export const getProposalsByCurrentWeek = async (req, res) => {
     try {
         const proposals = await findProposalsByWeek(currentWeek, userId);
         if (!proposals.length) {
-            return res.status(404).json({ error: "No proposals found for this week" });
+            return res
+                .status(404)
+                .json({ error: "No proposals found for this week" });
         }
         res.json(proposals);
     } catch (error) {
@@ -71,7 +56,9 @@ export const getProposalsByUser = async (req, res) => {
     try {
         const proposals = await findProposalsByUser(userId);
         if (!proposals.length) {
-            return res.status(404).json({ error: "No proposals found for this user" });
+            return res
+                .status(404)
+                .json({ error: "No proposals found for this user" });
         }
         res.json(proposals);
     } catch (error) {
@@ -83,11 +70,27 @@ export const getProposalsByUser = async (req, res) => {
 export const postProposal = async (req, res) => {
     try {
         const { userId, title, description, author } = req.body;
-        const imagePath = req.file ? req.file.path : null; // Get uploaded image path
+        const imagePath = req.file
+            ? `${req.protocol}://${req.get("host")}/uploads/${
+                  req.file.filename
+              }`
+            : null; // Get uploaded image path
 
         const week = getCurrentWeek();
 
-        const proposal = await createProposal(userId, title, description, author, week, imagePath);
+        const proposal = await createProposal(
+            userId,
+            title,
+            description,
+            author,
+            week,
+            imagePath
+        );
+        // Emit event to notify all clients
+        io.emit("imageUpdated", {
+            proposalId: proposal.id,
+            imageUrl: imagePath,
+        });
         return res.status(201).json(proposal);
     } catch (error) {
         console.error("Error creating proposal:", error);
@@ -99,7 +102,9 @@ export const postProposal = async (req, res) => {
 export const updateProposal = async (req, res) => {
     const { proposalId } = req.params;
     const { title, description, author } = req.body;
-    const imagePath = req.file ? req.file.path : null; // Get uploaded image path
+    const imagePath = req.file
+        ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
+        : null; // Get uploaded image path
 
     try {
         const proposal = await Proposal.findByPk(proposalId);
@@ -113,8 +118,23 @@ export const updateProposal = async (req, res) => {
         if (description !== undefined) proposal.description = description;
         if (author !== undefined) proposal.author = author;
         if (imagePath !== null) proposal.imageUrl = imagePath;
+        if (imagePath !== null) {
+            const filename = path.basename(req.file.filename);
+
+            // Generate the thumbnail using the correct local file path
+            proposal.thumbnailUrl = await generateThumbnail(
+                `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`,
+                filename
+            );
+        }
 
         await proposal.save(); // Save changes
+
+        // Emit event to notify all clients
+        io.emit("imageUpdated", {
+            proposalId: proposalId,
+            imageUrl: imagePath,
+        });
 
         return res.status(200).json(proposal);
     } catch (error) {
@@ -134,4 +154,3 @@ export const deleteProposal = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
-

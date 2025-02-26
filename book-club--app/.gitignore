@@ -30,3 +30,5 @@ docker-compose.yml
 .env.local
 
 migrations
+
+uploads
