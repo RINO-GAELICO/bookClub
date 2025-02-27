@@ -1,15 +1,42 @@
 import { Link } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
 import "./css/Home.css";
+import { api } from "./api";
 // Importing the book cover image
-import bookCoverImage from "./assets/placeholder-title.jpeg";
+import bookCoverPlaceHolder from "./assets/placeholder-no-title.jpeg";
 
 function Home() {
     // Placeholder data for the book of the week
     const bookTitle = "Educated";
     const bookAuthor = "Tara Westover";
-    const bookDescription = "Educated is a memoir by the American author Tara Westover. It details her journey from growing up in a strict household in rural Idaho and not attending school, to eventually earning a PhD from the University of Cambridge.";
+    const bookDescription =
+        "Educated is a memoir by the American author Tara Westover. It details her journey from growing up in a strict household in rural Idaho and not attending school, to eventually earning a PhD from the University of Cambridge.";
 
     const bookId = "1"; // Placeholder book ID
+    const [proposal, setProposal] = useState({});
+    const [error, setError] = useState(null);
+    const [week, setWeek] = useState(1);
+
+    useEffect(() => {
+        const fetchProposal = async () => {
+            try {
+                const response = await api.get("/proposals/most-voted");
+                setProposal(response.data);
+                console.log("Most Voted Proposal, ", proposal);
+            } catch (err) {
+                setError("Failed to fetch proposal.", err);
+            }
+        };
+
+        fetchProposal();
+    }, []);
+
+    useEffect(() => {
+        if (proposal) {
+            setWeek(proposal.week);
+            console.log("Week: ", proposal.week);
+        }
+    }, [proposal]);
 
     return (
         <div className="hero-background">
@@ -34,25 +61,25 @@ function Home() {
                             <hr className="separator" />
                             <p className="book-title">
                                 We are currently reading:{" "}
-                                <strong>{bookTitle}</strong>
+                                <strong>{proposal.title}</strong>
                             </p>
                             <p className="book-author">
-                                By <strong>{bookAuthor}</strong>
+                                By <strong>{proposal.author}</strong>
                             </p>
                         </div>
                         <div className="book-cover">
                             <img
-                                src={bookCoverImage}
-                                alt={`${bookTitle} cover`}
+                                src={proposal.imageUrl || bookCoverPlaceHolder}
+                                alt={`${proposal.title} cover`}
                             />
                         </div>
                     </div>
 
                     {/* Book Description */}
-                    <p className="book-description">{bookDescription}</p>
+                    <p className="book-description">{proposal.description}</p>
 
                     {/* Join Discussion Button */}
-                    <Link to={`/forum/${bookId}`} className="discussion-button">
+                    <Link to={`/forum/${week}`} className="discussion-button">
                         Join the Discussion
                     </Link>
                 </div>

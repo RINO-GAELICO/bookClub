@@ -26,8 +26,4 @@ router.get("/proposals/:proposalId/votes", getVotesByProposalController);
 // get votes by user
 router.get("/users/:userId/votes", getVotesByUserController);
 
-
-
-
-
 export default router;

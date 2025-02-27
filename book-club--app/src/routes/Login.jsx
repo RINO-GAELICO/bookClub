@@ -24,9 +24,13 @@ export default function Login() {
                 throw new Error("Invalid email or password.");
             }
 
+            console.log(`Login response: ${JSON.stringify(response.data)}`);
+
             const { accessToken, ...user } = response.data;
             login(user, accessToken);
-            console.log(`User logged in: ${user}`);
+            // save avatar in local storage
+            localStorage.setItem("avatar", user.avatar);
+            console.log(`User logged in: ${JSON.stringify(user)}`);
             console.log(`Access Token: ${accessToken}`);
             setError("");
             navigate("/");

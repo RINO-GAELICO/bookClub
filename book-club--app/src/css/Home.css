@@ -80,6 +80,7 @@
 }
 
 .welcome-section {
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -88,7 +89,7 @@
   font-weight: 600;     /* Bold text */
   max-width: 80%;       /* Limits the width of the text container */
   padding: 0 20px;      /* Optional: adds some padding for responsiveness */
-  border: solid 2px white;  /* Optional: adds a border around the text */
+
 }
 
 .separator {
@@ -108,13 +109,14 @@
 
 /* Card Styles for Selection of the Week */
 .card {
-  background-color: rgba(255, 255, 255, 0.2);  /* Semi-transparent white background */
+  background-color: rgba(0, 0, 0, 0.4);  /* Semi-transparent white background */
   padding: 20px;
   border-radius: 10px;
   margin-top: 20px;
   width: 80%; /* Makes the card take up 80% of the container width */
-  max-width: 600px;  /* Maximum width of the card */
+  max-width: 800px;  /* Maximum width of the card */
   text-align: center;
+  gap: 20px; /* Space between elements */
 }
 
 .selection-of-the-week {
@@ -163,19 +165,21 @@
 }
 
 .book-description {
-  font-size: 1rem;
+  font-size: 1.5em important;
   color: white;
   margin-top: 15px;
   line-height: 1.5;
   text-align: center;
-  max-width: 80%;
+  max-width: 100%;
   text-align: center;
-  align-self: center;
+  align-self: stretch;
+
 }
+
 
 .discussion-button {
   display: inline-block;
-  margin-top: 15px;
+  margin-top: 2em;
   padding: 10px 20px;
   font-size: 1rem;
   font-weight: 600;

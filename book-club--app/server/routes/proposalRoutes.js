@@ -5,7 +5,8 @@ import { getProposals,
     getProposalsByUser,
     updateProposal,
     deleteProposal,
-    getProposalsByCurrentWeek
+    getProposalsByCurrentWeek,
+    getMostVotedProposal
  } from "../controllers/proposalController.js";
 import authenticateToken from "../middleware/authenticateToken.js";
 import {upload} from "../middleware/imageService.js";
@@ -17,6 +18,9 @@ router.post("/proposal/post", authenticateToken, upload.single("image"), postPro
 
 // Get all proposals
 router.get("/proposals", getProposals);
+
+// Get most voted proposal of the week
+router.get("/proposals/most-voted", getMostVotedProposal);
 
 // Get all proposals by a specific user
 router.get("/proposals/user/:userId", getProposalsByUser);

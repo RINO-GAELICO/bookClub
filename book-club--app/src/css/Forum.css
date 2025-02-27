@@ -18,6 +18,7 @@
     gap: 10px;
     padding-bottom: 20px;
     color: #eaeaea;
+    width: 100%;
 }
 
 /* Header top (book image and meta info) */
@@ -27,6 +28,7 @@
     gap: 20px; /* Adds spacing between book cover and text */
     align-items: center;
     width: 100%;
+    height: 100%;
 }
 
 /* Book meta section */
@@ -62,10 +64,26 @@
 }
 
 /* Presentation text */
-.book-presentation {
-    font-size: 1rem;
+.book-description {
+    font-size: 1.5rem;
+    font-weight: 300;
+    text-align: left;
     margin-top: 10px;
     color: #b5b5b5; /* Light gray color for the presentation */
+
+    flex-grow: 1; /* Allow the book description to take the remaining space */
+    width: 100%; /* Ensure it takes the full width of the parent */
+    overflow: hidden; /* Prevent overflow of content */
+    display: flex; /* Ensure it's a block-level element */
+}
+
+/* Paragraph inside the book description */
+.book-description p {
+    width: 100%; /* Ensure the paragraph takes up the full width of the parent */
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove padding */
+    flex-grow: 1; /* Allow the paragraph to grow and fill available space */
+    display: flex; /* Ensure it behaves like a block element */
 }
 
 /* Separator (line between sections) */

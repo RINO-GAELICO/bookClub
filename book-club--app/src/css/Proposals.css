@@ -90,6 +90,8 @@
     justify-content: center;
     align-items: flex-start;
     text-align: left;
+    flex-grow: 1; /* Expand to take remaining space */
+    align-self: stretch;
 
 }
 
@@ -192,4 +194,8 @@ button:hover {
 
 .vote-button:hover {
     background-color: #218838;
+}
+
+.darkVote {
+    background-color: #0f4119;
 }

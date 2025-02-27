@@ -5,6 +5,7 @@ import {
     findProposalsByUser,
     removeProposal,
     findProposalsByWeek,
+    getVotesByProposal,
 } from "../services/dbService.js";
 import { generateThumbnail } from "../middleware/imageService.js";
 
@@ -42,6 +43,28 @@ export const getProposalsByCurrentWeek = async (req, res) => {
     }
 };
 
+// Get the most voted proposal of the week
+export const getMostVotedProposal = async (req, res) => {
+    const currentWeek = getCurrentWeek();
+
+    try {
+        const proposals = await findProposalsByWeek(currentWeek);
+        for (const proposal of proposals) {
+            const votes = await getVotesByProposal(proposal.id);
+            proposal.dataValues.votes = votes.length;
+        }
+
+        const mostVoted = proposals.reduce((prev, current) =>
+            (prev.dataValues.votes || 0) > (current.dataValues.votes || 0) ? prev : current
+        );
+
+        res.json(mostVoted);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 // Get a specific proposal by proposal id
 export const getProposalById = async (req, res) => {
     const { proposalId } = req.params;
@@ -77,6 +100,16 @@ export const postProposal = async (req, res) => {
             : null; // Get uploaded image path
 
         const week = getCurrentWeek();
+
+        if (imagePath !== null) {
+            const filename = path.basename(req.file.filename);
+
+            // Generate the thumbnail using the correct local file path
+            proposal.thumbnailUrl = await generateThumbnail(
+                `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`,
+                filename
+            );
+        }
 
         const proposal = await createProposal(
             userId,

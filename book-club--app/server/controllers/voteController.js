@@ -7,6 +7,7 @@ import {
     updateVote,
 } from "../services/dbService.js";
 import { getCurrentWeek } from "../utils.js";
+import { io } from "../server.js";
 
 // Function to create a vote
 export const postVote = async (req, res) => {

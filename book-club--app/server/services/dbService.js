@@ -21,7 +21,7 @@ export const getUserByEmail = async (email) => {
     try {
         return await User.findOne({
             where: { email },
-            attributes: ["userId", "username", "email", "password"],
+            attributes: ["userId", "username", "email", "password", "avatar"],
         });
     } catch (error) {
         throw new Error(`❌ Error fetching user: ${error.message}`);
@@ -79,7 +79,7 @@ export const createComment = async (
                     model: User,
                     as: "User",
                     required: true,
-                    attributes: ["userId", "username"],
+                    attributes: ["userId", "username", "avatar"],
                 },
             ],
         });
@@ -134,6 +134,7 @@ export const findProposalsByWeek = async (week, userId = null) => {
     });
 };
 
+
 // Function to get all comments by user
 export const getCommentsUser = async (userId) => {
     try {
@@ -162,7 +163,7 @@ export const getAllCommentsOnProposal = async (proposalId) => {
                     model: User,
                     as: "User",
                     required: true,
-                    attributes: ["userId", "username"],
+                    attributes: ["userId", "username", "avatar"],
                 },
             ],
         });

@@ -1,15 +1,12 @@
 // controllers/userController.js
 // Import services
 import logger from "../logger.js";
-import {
-    getAllUsers,
-    getUserByEmail,
-    registerNewUser,
-} from "../services/dbService.js";
+import { getAllUsers, getUserByEmail } from "../services/dbService.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { validationResult } from "express-validator";
 import { User } from "../models/Users.js";
+import { generateThumbnail } from "../middleware/imageService.js";
+import path from "path";
 
 // Get all users
 export const getUsers = async (req, res) => {
@@ -60,6 +57,7 @@ export const loginUser = async (req, res) => {
             userId: user.userId,
             username: user.username,
             email: user.email,
+            avatar: user.avatar,
         });
     } catch (error) {
         res.status(500).json({
@@ -167,8 +165,27 @@ export const registerUser = async (req, res) => {
             return res.status(400).json({ error: "Email is already in use." });
         }
 
+        // Create a thumbnail from the avatar
+        // Generate the thumbnail using the correct local file path
+        // if there is no file, set avatar to null
+        let avatar = null;
+        if (req.file) {
+            const filename = path.basename(req.file.filename);
+            avatar = await generateThumbnail(
+                `${req.protocol}://${req.get("host")}/uploads/${
+                    req.file.filename
+                }`,
+                filename
+            );
+        }
+
         // Create and save the new user
-        const newUser = await User.create({ username, email, password });
+        const newUser = await User.create({
+            username,
+            email,
+            password,
+            avatar,
+        });
 
         const { accessToken, refreshToken } = getAccesAndRefreshToken(newUser);
 

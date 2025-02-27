@@ -91,6 +91,7 @@ function Proposals() {
         // Listen for real-time vote updates
         socket.on("voteUpdated", ({ newVotes }) => {
             setVotes(newVotes);
+            console.log("Votes updated:", newVotes);
         });
 
         return () => {
@@ -364,7 +365,8 @@ function Proposals() {
                             </div>
                             <div className="proposal-vote">
                                 <button
-                                    className="vote-button"
+                                    // if the user has already voted for this proposal, append className with darkVote
+                                    className={voted == proposal.id ? "vote-button darkVote" : "vote-button"}
                                     onClick={() => handleVoting(proposal.id)}
                                     disabled={voted === proposal.id}
                                 >

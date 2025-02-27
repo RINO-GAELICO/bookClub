@@ -5,43 +5,93 @@ import remarkGfm from "remark-gfm";
 import "../css/Forum.css";
 import { api } from "../api";
 import useAuth from "../context/useAuth";
-
-// Import placeholder book cover
-import bookCoverImage from "../assets/placeholder-title.jpeg";
+import bookCoverPlaceHolder from "../assets/placeholder-no-title.jpeg";
 import avatarPic from "../assets/profile-placeholder.jpeg";
+import { io } from "socket.io-client";
+const SOCKET_URL = import.meta.env.VITE_BACKEND_SOCKET_URL;
 
 function Forum() {
-    const { proposalId } = useParams();
+    const { week } = useParams();
     const [error, setError] = useState("");
     const { user } = useAuth();
-
-    // Extract userId of logged-in user
-
-    // Placeholder data for the book discussion
-    const bookTitle = "Educated";
-    const bookAuthor = "Tara Westover";
-    const bookPresentation =
-        "An unforgettable memoir about a young person who, kept out of school, leaves her survivalist family and goes on to earn a PhD from Cambridge University";
-
     const [comments, setComments] = useState([]);
+    const [proposal, setProposal] = useState(null);
+    const [socket, setSocket] = useState(null); // State to store socket instance
+    // retrieve avatar from local storage
+    const avatar = localStorage.getItem("avatar");
+    console.log(`Avatar: ${avatar}`);
 
     useEffect(() => {
-        // Fetch comments related to the current proposalId
-        const fetchComments = async () => {
+        // Fetch proposal first
+        const fetchProposal = async () => {
             try {
-                const response = await api.get(
-                    `/comments/proposal/${proposalId}`
-                );
-                setComments(response.data);
+                const response = await api.get("/proposals/most-voted");
+                setProposal(response.data);
+                console.log("Most Voted Proposal, ", response.data);
             } catch (err) {
-                setError("Failed to fetch comments.", err);
+                setError("Failed to fetch proposal.", err);
             }
         };
 
-        fetchComments();
-    }, [proposalId]);
+        fetchProposal();
+    }, []);
 
-    console.log("comments", comments);
+    useEffect(() => {
+        if (proposal && proposal.id) {
+            // Only fetch comments once the proposal has been fetched
+            const fetchComments = async () => {
+                try {
+                    const response = await api.get(
+                        `/comments/proposal/${proposal.id}`
+                    );
+                    setComments(response.data);
+                } catch (err) {
+                    setError("Failed to fetch comments.", err);
+                }
+            };
+            fetchComments();
+        }
+    }, [proposal]);
+
+    useEffect(() => {
+        if (week) {
+            const socketInstance = io(SOCKET_URL);
+            setSocket(socketInstance);
+
+            // Listen for real-time comment updates
+            socketInstance.on("comments", (newComment) => {
+                // check if the comment is for the current week
+                if (newComment?.proposalId !== proposal?.id) return;
+                // Add the new comment to the state only if it's not already in the list
+                setComments((prevComments) => {
+                    // Check if the comment is already in the state to avoid duplicates
+                    if (!prevComments.some((c) => c.id === newComment.id)) {
+                        const updatedComments = [...prevComments, newComment];
+                        // Optionally: Scroll to the new comment after rendering
+                        setTimeout(() => {
+                            const newCommentElement = document.getElementById(
+                                `comment-${newComment.id}`
+                            );
+                            if (newCommentElement) {
+                                newCommentElement.scrollIntoView({
+                                    behavior: "smooth",
+                                });
+                            }
+                        }, 100);
+                        return updatedComments;
+                    }
+                    return prevComments; // Return unchanged state if the comment is already present
+                });
+            });
+
+            // Cleanup function to leave room and remove event listener
+            return () => {
+                socketInstance.off("comments");
+                // socketInstance.emit('leave', week); // Optionally leave the room when unmounting
+                socketInstance.disconnect(); // Disconnect the socket on component unmount
+            };
+        }
+    }, [week]);
 
     // State for new comment input
     const [newComment, setNewComment] = useState("");
@@ -62,15 +112,13 @@ function Forum() {
         if (newComment.trim() === "") return;
 
         const newCommentData = {
-            proposalId: proposalId,
+            proposalId: proposal.id,
             userId: user.userId,
             content: newComment,
             timestamp: new Date(),
-            avatar: avatarPic,
             replyTo: replyingTo ? replyingTo.id : null,
         };
-        console.log("Posting comment:", newCommentData);
-        console.log("replyingTo", replyingTo);
+
         try {
             // Get the token from storage (sessionStorage, localStorage, or wherever it is stored)
             const token = sessionStorage.getItem("accessToken"); // Or wherever you're storing it
@@ -87,23 +135,9 @@ function Forum() {
                 },
             });
 
-            console.log("response ", response.data);
-
-            // Add the newly created comment from backend response to state
-            setComments((prevComments) => [...prevComments, response.data]);
-
             setNewComment("");
             setReplyingTo(null);
 
-            // Scroll to the new comment after rendering
-            setTimeout(() => {
-                const newCommentElement = document.getElementById(
-                    `comment-${response.data.id}`
-                );
-                if (newCommentElement) {
-                    newCommentElement.scrollIntoView({ behavior: "smooth" });
-                }
-            }, 100);
         } catch (error) {
             console.error("Failed to post comment:", error);
             setError("Failed to post comment. Please try again.");
@@ -181,6 +215,8 @@ function Forum() {
         document.getElementById("comment-textarea").focus();
     };
 
+    console.log("Comments", comments);
+    console.log(`User: ${JSON.stringify(user)}`);
     return (
         <div>
             <div className="forum-container">
@@ -188,17 +224,21 @@ function Forum() {
                 <div className="forum-header">
                     <div className="header-top">
                         <img
-                            src={bookCoverImage}
-                            alt={`${bookTitle} cover`}
+                            src={proposal?.imageUrl || bookCoverPlaceHolder}
+                            alt={`${proposal?.title} cover`}
                             className="book-cover"
                         />
                         <div className="book-meta">
-                            <h1 className="book-title">{bookTitle}</h1>
-                            <h2 className="book-author">By {bookAuthor}</h2>
+                            <h1 className="book-title">{proposal?.title}</h1>
+                            <h2 className="book-author">
+                                By {proposal?.author}
+                            </h2>
                         </div>
                     </div>
-                    <div className="book-presentation">
-                        <p>{bookPresentation}</p>
+                    <div className="book-description">
+                        <p className="book-description-paragraph">
+                            {proposal?.description}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -224,7 +264,7 @@ function Forum() {
                                 <div className="comment-header">
                                     <img
                                         // TODO - Use the actual avatar URL from the API
-                                        src={avatarPic}
+                                        src={comment.User.avatar || avatarPic}
                                         alt={`${comment.user}'s avatar`}
                                         className="comment-avatar"
                                     />

@@ -4,9 +4,9 @@ import { sequelize } from "../db.js";
 
 const Proposal = sequelize.define("Proposal", {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    title: { type: DataTypes.STRING, allowNull: false },
+    title: { type: DataTypes.STRING(255), allowNull: false },
     author: { type: DataTypes.STRING, allowNull: true },
-    description: { type: DataTypes.STRING, allowNull: false },
+    description: { type: DataTypes.TEXT, allowNull: false },
     userId: { type: DataTypes.INTEGER, allowNull: false }, // Foreign key reference
     timestamp: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
     week: {

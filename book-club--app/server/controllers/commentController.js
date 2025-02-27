@@ -6,8 +6,10 @@ import {
     getRepliesComment,
     getAllCommentsOnProposal,
     changeComment,
-    removeComment
+    removeComment,
+    findProposalById
 } from "../services/dbService.js";
+import { io } from "../server.js";
 
 // Get all comments
 export const getComments = async (req, res) => {
@@ -34,6 +36,8 @@ export const postComment = async (req, res) => {
             content,
             replyTo || null
         );
+        io.emit("comments", newComment);
+
         res.status(201).json(newComment);
     } catch (error) {
         res.status(400).json({ error: error.message });

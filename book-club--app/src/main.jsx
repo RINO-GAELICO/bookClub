@@ -25,7 +25,7 @@ createRoot(document.getElementById("root")).render(
                     </Route>
                     <Route index element={<Home />} />
                     <Route path="/forum" element={<PrivateRoute element={<RedirectToForum />} />} />
-                    <Route path="/forum/:proposalId" element={<PrivateRoute element={<Forum />} />} />
+                    <Route path="/forum/:week" element={<PrivateRoute element={<Forum />} />} />
                     <Route path="/proposals/*" element={<PrivateRoute element={<Proposals />} />} />
                 </Routes>
             </main>

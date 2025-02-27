@@ -71,6 +71,16 @@ console.log('Socket.IO server is initialized and waiting for connections...');
 io.on("connection", (socket) => {
     console.log("User connected:", socket.id); // Logs connection event
 
+    // socket.on("join", (week) => {
+    //     socket.join(week);
+    //     console.log(`User ${socket.id} joined room: ${week}`);
+    // });
+
+    // socket.on("leave", (week) => {
+    //     socket.leave(week);
+    //     console.log(`User ${socket.id} left room: ${week}`);
+    // });
+
     // When user disconnects
     socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id); // Logs disconnection event
