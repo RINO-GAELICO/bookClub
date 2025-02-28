@@ -39,7 +39,7 @@ jobs:
 
     - name: Push Docker image to Google Container Registry
       run: |
-        gcloud auth configure-docker
+        gcloud auth configure-docker gcr.io
         docker push gcr.io/light-maker-450401-b0/bookclub-backend-service-img
 
     - name: SSH into GCE instance and deploy Docker container
