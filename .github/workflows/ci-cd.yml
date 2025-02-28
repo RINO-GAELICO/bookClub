@@ -14,34 +14,42 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
     - name: Cache Docker layers
-      uses: actions/cache@v3
+      uses: actions/cache@v2
       with:
         path: ~/.cache/docker
         key: ${{ runner.os }}-docker-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-docker-
 
+    - name: Build Docker image
+      run: |
+        docker build -t gcr.io/light-maker-450401-b0/bookclub-backend-service-img .
+
     - name: Set up GCP credentials
       run: |
         echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode > /tmp/gcp-key.json
         gcloud auth activate-service-account --key-file /tmp/gcp-key.json
+        gcloud config set project light-maker-450401-b0
 
-    - name: Build and push Docker image
+    - name: Push Docker image to Google Container Registry
       run: |
-        docker build -t gcr.io/light-maker-450401-b0/bookclub-backend-service-img .
         gcloud auth configure-docker
         docker push gcr.io/light-maker-450401-b0/bookclub-backend-service-img
 
-    - name: Deploy to Google Cloud Run
-      run: |
-        gcloud run deploy your-backend-service \
-          --image gcr.io/light-maker-450401-b0/bookclub-backend-service-img \
-          --platform managed \
-          --region us-central1 \
-          --allow-unauthenticated
+    - name: SSH into GCE instance and deploy Docker container
+      uses: appleboy/ssh-action@v1.2.1
+      with:
+        host: ${{ secrets.GCE_HOST }}
+        username: ${{ secrets.GCE_USERNAME }}
+        key: ${{ secrets.GCE_SSH_KEY }}
+        script: |
+          docker pull gcr.io/light-maker-450401-b0/bookclub-backend-service-img
+          docker stop bookclub-backend-service-instance || true
+          docker rm bookclub-backend-service-instance || true
+          docker run -d --name bookclub-backend-service-instance -p 5000:5000 --pull always gcr.io/light-maker-450401-b0/bookclub-backend-service-img
