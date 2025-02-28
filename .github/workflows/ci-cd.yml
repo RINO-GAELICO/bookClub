@@ -34,7 +34,7 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        docker build -t gcr.io/light-maker-450401-b0/bookclub-backend-service-img -f book-club-app/server/Dockerfile .
+        docker build -t gcr.io/light-maker-450401-b0/bookclub-backend-service-img .
         gcloud auth configure-docker
         docker push gcr.io/light-maker-450401-b0/bookclub-backend-service-img
 
