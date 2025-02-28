@@ -24,11 +24,15 @@ dist-ssr
 *.sw?
 
 # Docker compose
-docker-compose.yml
+docker-compose*.yml
 
-.env
+.env*
 .env.local
 
 migrations
 
 uploads
+
+credentials
+backup-folder
+credentials_xata.txt

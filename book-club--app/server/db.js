@@ -1,31 +1,39 @@
 import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
 
-// If you're running locally and need to load the .env file, this is where dotenv comes in.
-dotenv.config(); // This line ensures that .env file variables are loaded into process.env
+dotenv.config(); // Load environment variables
 
-// Database connection configuration
-const sequelize = new Sequelize({
-  host: process.env.DB_HOST || 'localhost', // Defaults to localhost if DB_HOST is not set
-  port: process.env.DB_PORT || 5432,        // Defaults to 5432 if DB_PORT is not set
-  username: process.env.DB_USER || 'bookclub_user', // Defaults to bookclub_user if DB_USER is not set
-  password: process.env.DB_PASSWORD || 'secretpassword', // Default password if DB_PASSWORD is not set
-  database: process.env.DB_NAME || 'bookclub', // Default database name if DB_NAME is not set
-  dialect: 'postgres', // Use PostgreSQL dialect
-  logging: false,       // Disable logging of SQL queries (set to true for debugging)
+// Ensure that DATABASE_URL_POSTGRES is correctly set
+const databaseUrl = process.env.DATABASE_URL_POSTGRES;
+
+if (!databaseUrl) {
+  console.error("❌ DATABASE_URL_POSTGRES is not defined. Check your .env file.");
+  process.exit(1); // Exit the app if DB URL is missing
+}
+
+// Create a new Sequelize instance using the connection string
+const sequelize = new Sequelize(databaseUrl, {
+  dialect: "postgres",
+  dialectOptions: {
+    ssl: {
+      require: true, // Required for Xata
+      rejectUnauthorized: false, // Allows self-signed certificates
+    },
+  },
+  logging: false, // Set to true for debugging SQL queries
 });
 
-// Test the connection to ensure it's working
+// Test the database connection
 const testConnection = async () => {
   try {
     await sequelize.authenticate();
-    console.log('✅ Database connected successfully!');
+    console.log("✅ Database connected successfully to Xata!");
   } catch (error) {
-    console.error('❌ Unable to connect to the database:', error);
+    console.error("❌ Unable to connect to the database:", error);
+    process.exit(1); // Exit the app on DB connection failure
   }
 };
 
-// Call the testConnection function to ensure the connection works
 testConnection();
 
 export { sequelize };
