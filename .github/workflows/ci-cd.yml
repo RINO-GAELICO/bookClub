@@ -14,13 +14,13 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
     - name: Cache Docker layers
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: ~/.cache/docker
         key: ${{ runner.os }}-docker-${{ github.sha }}
@@ -29,7 +29,7 @@ jobs:
 
     - name: Set up GCP credentials
       run: |
-        printf "%s" "${{ secrets.GCP_SA_KEY }}" | base64 --decode > /tmp/gcp-key.json
+        printf "%s" "${{ secrets.GCP_SA_KEY }}" > /tmp/gcp-key.json
         gcloud auth activate-service-account --key-file /tmp/gcp-key.json
 
     - name: Build and push Docker image
