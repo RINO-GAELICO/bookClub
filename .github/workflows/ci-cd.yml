@@ -38,10 +38,9 @@ jobs:
         gcloud config set project light-maker-450401-b0
         gcloud auth configure-docker
 
-    - name: Push Docker image to Google Container Registry
-      run: |
-        gcloud auth configure-docker
-        docker push gcr.io/light-maker-450401-b0/bookclub-backend-service-img
+    # - name: Push Docker image to Google Container Registry
+    #   run: |
+    #     docker push gcr.io/light-maker-450401-b0/bookclub-backend-service-img
 
     - name: SSH into GCE instance and deploy Docker container
       uses: appleboy/ssh-action@v1.2.1
