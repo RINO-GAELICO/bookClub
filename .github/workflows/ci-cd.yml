@@ -31,16 +31,19 @@ jobs:
       run: |
         docker build -t gcr.io/light-maker-450401-b0/bookclub-backend-service-img .
 
-    - name: Set up GCP credentials
+    - name: Authenticate with GCR using GCE Metadata Service
       run: |
-        echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode > /tmp/gcp-key.json
-        gcloud auth activate-service-account --key-file /tmp/gcp-key.json
-        gcloud config set project light-maker-450401-b0
-        gcloud auth configure-docker
+        ENDPOINT="metadata.google.internal/computeMetadata/v1"
+        ACCOUNT="default"
+        TOKEN=$(curl --silent --header "Metadata-Flavor: Google" \
+        http://${ENDPOINT}/instance/service-accounts/${ACCOUNT}/token)
+        ACCESS=$(echo ${TOKEN} | grep --extended-regexp --only-matching "(ya29\.[0-9a-zA-Z._-]*)")
+        HOST="https://gcr.io"
+        printf ${ACCESS} | docker login ${HOST} -u oauth2accesstoken --password-stdin
 
-    # - name: Push Docker image to Google Container Registry
-    #   run: |
-    #     docker push gcr.io/light-maker-450401-b0/bookclub-backend-service-img
+    - name: Push Docker image to Google Container Registry
+      run: |
+        docker push gcr.io/light-maker-450401-b0/bookclub-backend-service-img
 
     - name: SSH into GCE instance and deploy Docker container
       uses: appleboy/ssh-action@v1.2.1
@@ -49,7 +52,12 @@ jobs:
         username: ${{ secrets.GCE_USERNAME }}
         key: ${{ secrets.GCE_SSH_KEY }}
         script: |
+          # Pull the latest Docker image
           docker pull gcr.io/light-maker-450401-b0/bookclub-backend-service-img
+
+          # Stop and remove the old container if it exists
           docker stop bookclub-backend-service-instance || true
           docker rm bookclub-backend-service-instance || true
-          docker run -d --name bookclub-backend-service-instance -p 5000:5000 --pull always gcr.io/light-maker-450401-b0/bookclub-backend-service-img
+
+          # Run the new container with the .env file
+          docker run -d --env-file /home/duccio/.env -p 5000:5000 --pull always gcr.io/light-maker-450401-b0/bookclub-backend-service-img
