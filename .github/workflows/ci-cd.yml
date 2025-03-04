@@ -34,16 +34,9 @@ jobs:
     - name: Set up GCP credentials
       run: |
         echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode > /tmp/gcp-key.json
-        gcloud auth activate-service-account --key-file /tmp/gcp-key.json
+        gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
         gcloud config set project light-maker-450401-b0
-        gcloud auth configure-docker
-        ENDPOINT="metadata.google.internal/computeMetadata/v1"
-        ACCOUNT="default"
-        TOKEN=$(curl --silent --header "Metadata-Flavor: Google" \
-          http://${ENDPOINT}/instance/service-accounts/${ACCOUNT}/token)
-        ACCESS=$(echo ${TOKEN} | grep --extended-regexp --only-matching "(ya29\.[0-9a-zA-Z._-]*)")
-        HOST="https://gcr.io"
-        printf ${ACCESS} | docker login ${HOST} -u oauth2accesstoken --password-stdin
+        gcloud auth configure-docker --quiet
 
 
     - name: Push Docker image to Google Container Registry
@@ -53,11 +46,12 @@ jobs:
     - name: SSH into GCE instance and deploy Docker container
       uses: appleboy/ssh-action@v1.2.1
       with:
-        host: ${{ secrets.GCE_HOST }}
-        username: ${{ secrets.GCE_USERNAME }}
-        key: ${{ secrets.GCE_SSH_KEY }}
-        script: |
-          docker pull gcr.io/light-maker-450401-b0/bookclub-backend-service-img
-          docker stop bookclub-backend-service-instance || true
-          docker rm bookclub-backend-service-instance || true
-          docker run -d --name bookclub-backend-service-instance -p 5000:5000 --pull always gcr.io/light-maker-450401-b0/bookclub-backend-service-img
+          host: ${{ secrets.GCE_HOST }}
+          username: ${{ secrets.GCE_USERNAME }}
+          key: ${{ secrets.GCE_SSH_KEY }}
+          script: |
+            gcloud auth configure-docker --quiet
+            docker pull gcr.io/light-maker-450401-b0/bookclub-backend-service-img:latest
+            docker stop bookclub-backend-service-instance || true
+            docker rm bookclub-backend-service-instance || true
+            docker run -d --name bookclub-backend-service-instance -p 5000:5000 --restart always gcr.io/light-maker-450401-b0/bookclub-backend-service-img:latest
