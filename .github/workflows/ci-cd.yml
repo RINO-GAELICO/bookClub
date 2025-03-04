@@ -57,4 +57,4 @@ jobs:
             HOST="https://gcr.io"
             printf ${ACCESS} | docker login ${HOST} -u oauth2accesstoken --password-stdin
             pwd && ls -la
-            docker run --env-file .env -d --name bookclub-backend-service-instance -p 5000:5000 --pull always gcr.io/light-maker-450401-b0/bookclub-backend-service-img
+            docker run --env-file /home/duccio/.env -d --name bookclub-backend-service-instance -p 5000:5000 --pull always gcr.io/light-maker-450401-b0/bookclub-backend-service-img
