@@ -56,6 +56,8 @@ jobs:
             ACCESS=$(echo ${TOKEN} | grep --extended-regexp --only-matching "(ya29\.[0-9a-zA-Z._-]*)")
             HOST="https://gcr.io"
             printf ${ACCESS} | docker login ${HOST} -u oauth2accesstoken --password-stdin
+            docker stop bookclub-backend-service-instance || true
+            docker rm bookclub-backend-service-instance || true
             docker run -d --name bookclub-backend-service-instance -p 5000:5000 \
                 -e XATA_API_KEY=${{ secrets.XATA_API_KEY }} \
                 -e DATABASE_URL_POSTGRES=${{ secrets.DATABASE_URL_POSTGRES }} \
