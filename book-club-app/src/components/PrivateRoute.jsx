@@ -1,7 +1,7 @@
 // PrivateRoute component to protect routes that require authentication
 import { Navigate } from "react-router-dom";
 import PropTypes from "prop-types";
-import useAuth from "../context/useAuth"; // Import the useAuth hook
+import useAuth from "../context/useAuth";
 
 const PrivateRoute = ({ element }) => {
     const { user } = useAuth();

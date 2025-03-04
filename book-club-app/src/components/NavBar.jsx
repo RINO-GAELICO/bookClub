@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import React from "react";
 import clsx from "clsx";
-import "../css/NavBar.css";
+import '@css/navbar.css';
 import useAuth from "../context/useAuth";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
