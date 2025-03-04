@@ -9,7 +9,7 @@ export default defineConfig({
         alias: {
           '@src': '/src',  // This will treat `/src` as an alias to `src/`
           '@components': '/src/components',  // Alias for the components folder
-          '@css': '/source/css'  // Alias for the css folder
+          '@css': '/src/css'  // Alias for the css folder
         },
     },
 });
