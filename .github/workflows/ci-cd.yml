@@ -67,4 +67,6 @@ jobs:
                 -e DB_USER=${{ secrets.DB_USER }} \
                 -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
                 -e DB_NAME=${{ secrets.DB_NAME }} \
+                -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+                -e JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} \
                 --pull always gcr.io/light-maker-450401-b0/bookclub-backend-service-img
