@@ -55,7 +55,9 @@ function Forum() {
 
     useEffect(() => {
         if (week) {
-            const socketInstance = io(SOCKET_URL);
+            const socketInstance = io(SOCKET_URL, {
+                withCredentials: true,
+            });
             setSocket(socketInstance);
 
             // Listen for real-time comment updates

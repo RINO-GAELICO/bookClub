@@ -62,8 +62,9 @@ const server = createServer(app);
 // Set up WebSocket server (after Express and middleware)
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173", // Allow your frontend
+        origin: "https://bookclub-paranoico.netlify.app", // Allow your frontend
         methods: ["GET", "POST"],
+        credentials: true,
     },
 });
 
