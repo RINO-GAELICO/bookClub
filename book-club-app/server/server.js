@@ -23,7 +23,9 @@ const PORT = process.env.PORT || 5000;
 // Middleware setup first (before routes)
 app.use(cors({
     // origin: "http://localhost:5173",
-    origin: "*", // Allow all origins
+    origin: "https://bookclub-paranoico.netlify.app",
+    methods: 'GET,POST,PUT,DELETE,OPTIONS', // Allow necessary HTTP methods
+    allowedHeaders: 'Content-Type,Authorization', // Allow specific headers
     credentials: true,
 }));
 
