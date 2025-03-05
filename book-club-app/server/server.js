@@ -20,14 +20,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware setup first (before routes)
 app.use(cors({
-    // origin: "http://localhost:5173",
-    origin: "https://bookclub-paranoico.netlify.app",
-    methods: 'GET,POST,PUT,DELETE,OPTIONS', // Allow necessary HTTP methods
-    allowedHeaders: 'Content-Type,Authorization', // Allow specific headers
-    credentials: true,
+    origin: "https://bookclub-paranoico.netlify.app", // Allow your frontend's origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow specific HTTP methods, including OPTIONS
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+    credentials: true, // Allow cookies and credentials
+    preflightContinue: false, // Don't let the request continue without sending the response
+    optionsSuccessStatus: 204, // Set the status code for successful OPTIONS requests
 }));
+
+app.options('*', cors());
 
 app.use(express.json());
 app.use(cookieParser());
