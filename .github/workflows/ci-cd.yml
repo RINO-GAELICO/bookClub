@@ -26,10 +26,45 @@ jobs:
         key: ${{ runner.os }}-docker-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-docker-
+    - name: Clean up old Docker containers
+      run: |
+        # Remove all stopped containers
+        docker container prune -f
+
+        # Remove all unused images (dangling images)
+        docker image prune -f
 
     - name: Build Docker image
       run: |
+        # Build the Docker image
         docker build -t gcr.io/light-maker-450401-b0/bookclub-backend-service-img .
+
+        # Get the current image digest (hash)
+        IMAGE_DIGEST=$(docker images --digests --format "{{.Repository}}@{{.Digest}}" gcr.io/light-maker-450401-b0/bookclub-backend-service-img)
+
+        # Save the image digest for future comparison
+        echo $IMAGE_DIGEST > image_digest.txt
+        echo "Image digest: $IMAGE_DIGEST"
+
+    - name: Check if image has changed
+      run: |
+        # Retrieve the previously pushed image digest (from a previous build)
+        if [ -f image_digest.txt ]; then
+          PREVIOUS_DIGEST=$(cat image_digest.txt)
+          echo "Previous image digest: $PREVIOUS_DIGEST"
+        else
+          echo "No previous digest found, pushing the image for the first time."
+          exit 0
+        fi
+
+        # Compare the digests and conditionally push if different
+        if [ "$IMAGE_DIGEST" != "$PREVIOUS_DIGEST" ]; then
+          echo "Image has changed. Proceeding with image push."
+          exit 0
+        else
+          echo "No changes detected in the image. Skipping image push."
+          exit 1
+        fi
 
     - name: Set up GCP credentials
       run: |
