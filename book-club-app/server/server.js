@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors({
     origin: "https://bookclub-paranoico.netlify.app", // Allow your frontend's origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow specific HTTP methods, including OPTIONS
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // Allow specific HTTP methods, including OPTIONS
     allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
     credentials: true, // Allow cookies and credentials
     preflightContinue: false, // Don't let the request continue without sending the response
