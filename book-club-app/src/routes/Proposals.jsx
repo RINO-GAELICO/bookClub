@@ -144,17 +144,18 @@ function Proposals() {
             myProposal.description.trim() === "" ||
             myProposal.author.trim() === ""
         ) {
+            console.log("Title, Author, and Description are required.");
             setError("Title, Author, and Description are required.");
             return;
         }
 
         const token = sessionStorage.getItem("accessToken");
         if (!token) {
+            console.log("You must be logged in.");
             setError("You must be logged in.");
             return;
         }
 
-        console.log("Access Token:", token);
 
         // Create FormData to send image file and text fields
         const formData = new FormData();
@@ -162,7 +163,7 @@ function Proposals() {
         formData.append("title", myProposal.title);
         formData.append("description", myProposal.description);
         formData.append("author", myProposal.author);
-        console.log("Author:", myProposal.author);
+
         if (imageFile) {
             formData.append("image", imageFile); // Attach image if available
         }
