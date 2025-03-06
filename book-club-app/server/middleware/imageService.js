@@ -13,7 +13,8 @@ const bucket = storage.bucket(bucketName);
 // Multer setup (store files in memory first)
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024 },
+    // 20 MB limit
+    limits: { fileSize: 20 * 1024 * 1024 },
 });
 
 /**
