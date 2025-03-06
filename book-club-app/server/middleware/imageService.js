@@ -1,67 +1,93 @@
 import multer from "multer";
-import sharp from "sharp";
+import { Storage } from "@google-cloud/storage";
 import path from "path";
+import sharp from "sharp";
 import fs from "fs";
+import { v4 as uuidv4 } from "uuid";
 
-// Set up storage for original images
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "uploads/"); // Save original image in uploads directory
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    },
+// Configure Google Cloud Storage
+const storage = new Storage({
+    keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Path to service account JSON file
+});
+const bucketName = process.env.GCS_BUCKET_NAME; // Your GCS bucket name
+const bucket = storage.bucket(bucketName);
+
+// Multer setup (store files in memory first)
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-// Multer upload middleware
-export const upload = multer({ storage });
-
-// Function to generate a thumbnail
-export const generateThumbnail = async (filePath, filename) => {
-    // If filePath includes protocol and host (e.g. 'http://localhost:5000/uploads/...')
-    let localFilePath;
-    const protocol = process.env.PROTOCOL; // Default to 'http' if not set
-    const host = process.env.HOST;
-    const port = process.env.PORT;
-    if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
-        // Remove the protocol and host part of the URL dynamically
-        console.log(`protocol: ${protocol}, host: ${host}, port: ${port}`);
-        const cleanedFilePath = filePath.replace(
-            `${protocol}://${host}:${port}`,
-            ""
-        );
-        localFilePath = path.join(process.cwd(), cleanedFilePath); // Get the absolute path from the relative URL
-    } else {
-        localFilePath = path.join(process.cwd(), filePath); // If filePath is already relative, use it as is
-    }
-    console.log(`localFilePath: ${localFilePath}`);
-
-    const thumbnailPath = path.join(
-        process.cwd(),
-        "uploads",
-        "thumbnails",
-        filename
-    ); // Path to store the thumbnail
-
-    // Check if the file exists before processing
-    if (!fs.existsSync(localFilePath)) {
-        console.error(`File not found: ${localFilePath}`);
-        throw new Error("Input file is missing");
-    }
-
+/**
+ * Uploads an image to Google Cloud Storage
+ * @param {Object} file - The uploaded file object from Multer
+ * @returns {String} - The public URL of the uploaded image
+ */
+const uploadToGCS = async (file) => {
     try {
-        // Generate the thumbnail
-        await sharp(localFilePath)
-            .resize(100, 100) // Resize the image to 100x100 pixels
-            .toFile(thumbnailPath);
+        const filename = `${uuidv4()}-${file.originalname}`;
+        const fileUpload = bucket.file(filename);
 
-        // Return the URL for the thumbnail (accessible by frontend)
-        const thumbnailUrl = `${protocol}://${host}:${port}/uploads/thumbnails/${filename}`;
+        // Create a writable stream
+        const stream = fileUpload.createWriteStream({
+            metadata: { contentType: file.mimetype },
+        });
 
-        console.log(`Thumbnail generated at: ${thumbnailPath}`);
-        return thumbnailUrl; // Return the URL for the thumbnail
+        // Upload file data
+        stream.end(file.buffer);
+
+        // Wait until the file is fully uploaded
+        await new Promise((resolve, reject) => {
+            stream.on("finish", resolve);
+            stream.on("error", reject);
+        });
+
+        // Make the file publicly accessible
+        await fileUpload.makePublic();
+
+        // Return the public URL
+        return `https://storage.googleapis.com/${bucketName}/${filename}`;
     } catch (error) {
-        console.error("Error generating thumbnail:", error);
-        throw error; // Re-throw the error for handling elsewhere
+        console.error("Error uploading to GCS:", error);
+        throw error;
     }
 };
+
+/**
+ * Generates a thumbnail and uploads it to Google Cloud Storage
+ * @param {Buffer} fileBuffer - The uploaded file's buffer
+ * @param {String} originalFilename - The original file name
+ * @returns {String} - The public URL of the thumbnail
+ */
+const generateThumbnail = async (fileBuffer, originalFilename) => {
+    try {
+        const filename = `thumbnails/${uuidv4()}-${originalFilename}`;
+        const fileUpload = bucket.file(filename);
+
+        // Generate the thumbnail
+        const thumbnailBuffer = await sharp(fileBuffer)
+            .resize(100, 100)
+            .toBuffer();
+
+        // Create a writable stream
+        const stream = fileUpload.createWriteStream({
+            metadata: { contentType: "image/png" },
+        });
+
+        stream.end(thumbnailBuffer);
+
+        await new Promise((resolve, reject) => {
+            stream.on("finish", resolve);
+            stream.on("error", reject);
+        });
+
+        await fileUpload.makePublic();
+
+        return `https://storage.googleapis.com/${bucketName}/${filename}`;
+    } catch (error) {
+        console.error("Error generating and uploading thumbnail:", error);
+        throw error;
+    }
+};
+
+export { upload, uploadToGCS, generateThumbnail };

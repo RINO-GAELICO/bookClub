@@ -7,7 +7,8 @@ import {
     findProposalsByWeek,
     getVotesByProposal,
 } from "../services/dbService.js";
-import { generateThumbnail } from "../middleware/imageService.js";
+// import { generateThumbnail } from "../middleware/imageService.js";
+import { uploadToGCS, generateThumbnail } from "../middleware/imageService.js";
 
 import { getCurrentWeek } from "../utils.js";
 import { Proposal } from "../models/Proposals.js";
@@ -93,23 +94,15 @@ export const getProposalsByUser = async (req, res) => {
 export const postProposal = async (req, res) => {
     try {
         const { userId, title, description, author } = req.body;
-        const imagePath = req.file
-            ? `${req.protocol}://${req.get("host")}/uploads/${
-                  req.file.filename
-              }`
-            : null; // Get uploaded image path
+        let imageUrl = null;
+        let thumbnailUrl = null;
+
+        if (req.file) {
+            imageUrl = await uploadToGCS(req.file);
+            thumbnailUrl = await generateThumbnail(req.file.buffer, req.file.originalname);
+        }
 
         const week = getCurrentWeek();
-
-        if (imagePath !== null) {
-            const filename = path.basename(req.file.filename);
-
-            // Generate the thumbnail using the correct local file path
-            proposal.thumbnailUrl = await generateThumbnail(
-                `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`,
-                filename
-            );
-        }
 
         const proposal = await createProposal(
             userId,
@@ -117,13 +110,12 @@ export const postProposal = async (req, res) => {
             description,
             author,
             week,
-            imagePath
+            imageUrl,
+            thumbnailUrl
         );
-        // Emit event to notify all clients
-        io.emit("imageUpdated", {
-            proposalId: proposal.id,
-            imageUrl: imagePath,
-        });
+
+        io.emit("imageUpdated", { proposalId: proposal.id, imageUrl });
+
         return res.status(201).json(proposal);
     } catch (error) {
         console.error("Error creating proposal:", error);
@@ -131,43 +123,33 @@ export const postProposal = async (req, res) => {
     }
 };
 
-// Update a proposal
 export const updateProposal = async (req, res) => {
     const { proposalId } = req.params;
     const { title, description, author } = req.body;
-    const imagePath = req.file
-        ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
-        : null; // Get uploaded image path
 
     try {
         const proposal = await Proposal.findByPk(proposalId);
-
         if (!proposal) {
             return res.status(404).json({ error: "Proposal not found" });
         }
 
-        // Only update the fields that are provided in the request
-        if (title !== undefined) proposal.title = title;
-        if (description !== undefined) proposal.description = description;
-        if (author !== undefined) proposal.author = author;
-        if (imagePath !== null) proposal.imageUrl = imagePath;
-        if (imagePath !== null) {
-            const filename = path.basename(req.file.filename);
+        let imageUrl = proposal.imageUrl;
+        let thumbnailUrl = proposal.thumbnailUrl;
 
-            // Generate the thumbnail using the correct local file path
-            proposal.thumbnailUrl = await generateThumbnail(
-                `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`,
-                filename
-            );
+        if (req.file) {
+            imageUrl = await uploadToGCS(req.file);
+            thumbnailUrl = await generateThumbnail(req.file.buffer, req.file.originalname);
         }
 
-        await proposal.save(); // Save changes
+        if (title) proposal.title = title;
+        if (description) proposal.description = description;
+        if (author) proposal.author = author;
+        if (imageUrl) proposal.imageUrl = imageUrl;
+        if (thumbnailUrl) proposal.thumbnailUrl = thumbnailUrl;
 
-        // Emit event to notify all clients
-        io.emit("imageUpdated", {
-            proposalId: proposalId,
-            imageUrl: imagePath,
-        });
+        await proposal.save();
+
+        io.emit("imageUpdated", { proposalId, imageUrl });
 
         return res.status(200).json(proposal);
     } catch (error) {

@@ -9,6 +9,7 @@
         "sequelize": "node --loader ts-node/esm node_modules/.bin/sequelize"
     },
     "dependencies": {
+        "@google-cloud/storage": "^7.15.2",
         "bcryptjs": "^3.0.1",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
