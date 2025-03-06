@@ -64,10 +64,6 @@ export const createComment = async (
 ) => {
     try {
 
-        // convert all numbers to integers
-        userId = parseInt(userId);
-        proposalId = parseInt(proposalId);
-        replyTo = parseInt(replyTo);
         // Create the comment
         const newComment = await Comment.create({
             userId,

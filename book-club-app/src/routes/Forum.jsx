@@ -93,7 +93,7 @@ function Forum() {
                 socketInstance.disconnect(); // Disconnect the socket on component unmount
             };
         }
-    }, [week]);
+    }, [proposal?.id, week]);
 
     // State for new comment input
     const [newComment, setNewComment] = useState("");
