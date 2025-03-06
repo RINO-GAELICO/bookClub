@@ -16,6 +16,9 @@ COPY book-club-app/server/ ./
 # Expose the necessary port (if any)
 EXPOSE 5000
 
-# Start the application with a script
-CMD ["/bin/sh", "-c", "echo \"$GOOGLE_APPLICATION_CREDENTIALS_CONTENT\" | base64 --decode > /tmp/gcp-key.json && export GOOGLE_APPLICATION_CREDENTIALS='/tmp/gcp-key.json' && npm start"]
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
+# Set entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
