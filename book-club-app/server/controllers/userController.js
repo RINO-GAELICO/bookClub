@@ -5,8 +5,8 @@ import { getAllUsers, getUserByEmail } from "../services/dbService.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/Users.js";
-import { generateThumbnail } from "../middleware/imageService.js";
-import path from "path";
+import { generateThumbnail, uploadToGCS } from "../middleware/imageService.js";
+
 
 // Get all users
 export const getUsers = async (req, res) => {
