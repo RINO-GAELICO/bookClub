@@ -158,11 +158,14 @@ export const registerUser = async (req, res) => {
         // Debugging: Check received values
         console.log("Received data:", req.body);
 
-        // Ensure email lookup is correct
-        const existingUser = await User.findOne({ where: { email } });
+        // Make sure email or username are not already in use
+        const existingUser = await User.findOne({
+            $or: [{ email }, { username }],
+        });
+
 
         if (existingUser) {
-            return res.status(400).json({ error: "Email is already in use." });
+            return res.status(400).json({ error: "Email or username already in use" });
         }
 
         let avatar = null;

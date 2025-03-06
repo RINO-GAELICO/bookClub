@@ -71,6 +71,8 @@ export const createComment = async (
             replyTo,
         });
 
+        console.log("New comment:", newComment);
+
         // Fetch the comment with the associated user (to get the username)
         const createdCommentWithUser = await Comment.findOne({
             where: { id: newComment.id },
