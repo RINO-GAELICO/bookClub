@@ -40,8 +40,8 @@ const uploadToGCS = async (file) => {
             stream.on("error", reject);
         });
 
-        // Make the file publicly accessible
-        await fileUpload.makePublic();
+        // // Make the file publicly accessible
+        // await fileUpload.makePublic();
 
         // Return the public URL
         return `https://storage.googleapis.com/${bucketName}/${filename}`;
