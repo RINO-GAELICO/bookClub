@@ -63,6 +63,11 @@ export const createComment = async (
     replyTo = null
 ) => {
     try {
+
+        // convert all numbers to integers
+        userId = parseInt(userId);
+        proposalId = parseInt(proposalId);
+        replyTo = parseInt(replyTo);
         // Create the comment
         const newComment = await Comment.create({
             userId,
@@ -70,8 +75,6 @@ export const createComment = async (
             content,
             replyTo,
         });
-
-        console.log("New comment:", newComment);
 
         // Fetch the comment with the associated user (to get the username)
         const createdCommentWithUser = await Comment.findOne({
