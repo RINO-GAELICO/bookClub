@@ -105,5 +105,5 @@ jobs:
                 -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
                 -e JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} \
                 -e GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }} \
-                -e GOOGLE_APPLICATION_CREDENTIALS="/tmp/gcp-key.json" \
+                -e GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GCP_SA_KEY }} \
                 --pull always gcr.io/light-maker-450401-b0/bookclub-backend-service-img
