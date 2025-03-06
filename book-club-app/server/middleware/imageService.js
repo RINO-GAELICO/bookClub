@@ -1,12 +1,8 @@
 import multer from "multer";
 import { Storage } from "@google-cloud/storage";
-import path from "path";
 import sharp from "sharp";
-import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 
-console.log("GOOGLE_APPLICATION_CREDENTIALS", process.env.GOOGLE_APPLICATION_CREDENTIALS);
-console.log("GCS_BUCKET_NAME", process.env.GCS_BUCKET_NAME);
 // Configure Google Cloud Storage
 const storage = new Storage({
     keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Path to service account JSON file
