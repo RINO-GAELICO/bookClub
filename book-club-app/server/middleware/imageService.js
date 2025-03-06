@@ -40,8 +40,6 @@ const uploadToGCS = async (file) => {
             stream.on("error", reject);
         });
 
-        // // Make the file publicly accessible
-        // await fileUpload.makePublic();
 
         // Return the public URL
         return `https://storage.googleapis.com/${bucketName}/${filename}`;
@@ -79,7 +77,6 @@ const generateThumbnail = async (fileBuffer, originalFilename) => {
             stream.on("error", reject);
         });
 
-        await fileUpload.makePublic();
 
         return `https://storage.googleapis.com/${bucketName}/${filename}`;
     } catch (error) {
