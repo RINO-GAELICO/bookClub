@@ -72,7 +72,7 @@ export const getAccesAndRefreshToken = (user) => {
     const accessToken = jwt.sign(
         { userId: user.userId, username: user.username },
         process.env.JWT_SECRET,
-        { expiresIn: "15m" }
+        { expiresIn: "60m" }
     );
 
     // Generate Refresh Token (Long-lived)
@@ -105,7 +105,7 @@ export const refreshToken = (req, res) => {
         const newAccessToken = jwt.sign(
             { userId: decoded.userId, username: decoded.username },
             process.env.JWT_SECRET,
-            { expiresIn: "15m" }
+            { expiresIn: "60m" }
         );
 
         res.json({
@@ -165,18 +165,13 @@ export const registerUser = async (req, res) => {
             return res.status(400).json({ error: "Email is already in use." });
         }
 
-        // Create a thumbnail from the avatar
-        // Generate the thumbnail using the correct local file path
-        // if there is no file, set avatar to null
         let avatar = null;
         if (req.file) {
-            const filename = path.basename(req.file.filename);
-            avatar = await generateThumbnail(
-                `${req.protocol}://${req.get("host")}/uploads/${
-                    req.file.filename
-                }`,
-                filename
-            );
+            // Upload the original file to GCS
+            const imageUrl = await uploadToGCS(req.file);
+
+            // Generate a thumbnail using the image buffer
+            avatar = await generateThumbnail(req.file.buffer, req.file.originalname);
         }
 
         // Create and save the new user
@@ -211,3 +206,4 @@ export const registerUser = async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 };
+

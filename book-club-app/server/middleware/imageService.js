@@ -65,7 +65,7 @@ const generateThumbnail = async (fileBuffer, originalFilename) => {
             .resize(100, 100)
             .toBuffer();
 
-        // Create a writable stream
+        // Create a writable stream to upload the thumbnail to GCS
         const stream = fileUpload.createWriteStream({
             metadata: { contentType: "image/png" },
         });
@@ -76,7 +76,6 @@ const generateThumbnail = async (fileBuffer, originalFilename) => {
             stream.on("finish", resolve);
             stream.on("error", reject);
         });
-
 
         return `https://storage.googleapis.com/${bucketName}/${filename}`;
     } catch (error) {
