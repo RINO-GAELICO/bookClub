@@ -163,6 +163,7 @@ export const registerUser = async (req, res) => {
             $or: [{ email }, { username }],
         });
 
+        console.log("Existing user:", existingUser);
 
         if (existingUser) {
             return res.status(400).json({ error: "Email or username already in use" });
