@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/Users.js";
 import { generateThumbnail, uploadToGCS } from "../middleware/imageService.js";
+import { Op } from "sequelize";
 
 
 // Get all users
@@ -160,7 +161,9 @@ export const registerUser = async (req, res) => {
 
         // Make sure email or username are not already in use
         const existingUser = await User.findOne({
-            $or: [{ email }, { username }],
+            where: {
+                [Op.or]: [{ email }, { username }]
+            }
         });
 
         console.log("Existing user:", existingUser);

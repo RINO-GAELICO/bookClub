@@ -45,6 +45,11 @@ app.use(
     })
 );
 
+// Use a route for the health check
+app.get("/health", (req, res) => {
+    res.json({ message: "Server is running" });
+});
+
 // Authentication Routes
 app.use("/api", authRoutes);
 
